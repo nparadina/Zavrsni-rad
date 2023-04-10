@@ -71,7 +71,8 @@ minimizer_results_list=[]
 
 for i in range(0,len(parameter_array)):
     minimizer_results_list.append(perform_fitting(parameter_array[i],mortality_data[0],mortality_data[i+1]))
-    #report_fit(minimizer_results_list[i])
+    report_fit(minimizer_results_list[i])
+    print("\n")
 
 pass
 
