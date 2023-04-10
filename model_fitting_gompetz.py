@@ -36,7 +36,7 @@ from perform_fitting import perform_fitting
 # print(x)
 
 #Build Dataframe Object from Excel import
-df = pd.read_excel('C:/Users/nikap/Documents/Edukacija/Phyton/Zavrsni rad/Markov Model for Pricing CI insurance products/Gompertz-Makeham Model fitting/Vjerojatnost smrti oboljele populacije.xlsx')
+df = pd.read_excel('C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Vjerojatnost smrti populacije od kriticnih bolesti i zdravih od ostalih bolesti.xlsx')
 # print(df)
 # print(df['Dob'])
 # print(df['Dob'].to_numpy())
@@ -59,7 +59,7 @@ for column in df:
 # df2.to_excel(excel_writer='C:/Users/nikap/Documents/Edukacija/Phyton/Zavrsni rad/Markov Model for Pricing CI insurance products/Gompertz-Makeham Model fitting/Vjerojatnost smrti oboljele populacije2.xlsx')
 
 #initialize array for all parameters, set initial values from Excel file
-parameters_initial_df = pd.read_excel('C:/Users/nikap/Documents/Edukacija/Phyton/Zavrsni rad/Markov Model for Pricing CI insurance products/Gompertz-Makeham Model fitting/Inijalni parametri GM Modela.xlsx')
+parameters_initial_df = pd.read_excel('C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Inijalni parametri GM Modela.xlsx')
 parameter_array=parameters_initial_df.iloc[:,1:].to_numpy()
 #parameter_array=np.empty([parameters_initial[1],2])
 #print(len(parameter_array))
