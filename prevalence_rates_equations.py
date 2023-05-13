@@ -3,7 +3,9 @@ import scipy.integrate as integrate
 import sympy as sm
 import transitional_probabilities_functions as tp
 
+def prevalence_rate_equations (transitional_probability_expressions_all, average_prevalance_rates_all)
 #Define as function, add pZZ, pZi list, no list argument as paramters
+pass
 arg_pZi=0
 arg_pZZ=0
 arg_pZi=0
