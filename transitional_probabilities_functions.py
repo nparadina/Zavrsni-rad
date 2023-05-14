@@ -28,14 +28,23 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
     
     #building an auxiliary list fo keep the expressiontypes in DataFrame columns
     expressiontypes=[]
+    
+   
 
     #supstituting varibales with numerical values
     for row in mortality_params_df_values.itertuples():
         if row[0]!="ZM":
-            transitional_probability_expressions_row_pii=pd.Series(data=pii.subs(beta_2_Z,mortality_params_df_values["beta2"][row[0]]).subs(beta_1_Z,mortality_params_df_values["beta1"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            transitional_probability_expressions_row_pii=pd.Series(data=pii.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta1"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
             transitional_probability_expressions_pii=pd.concat([transitional_probability_expressions_pii,transitional_probability_expressions_row_pii], axis=0)
             expressiontypes.append("pii")
-            transitional_probability_expressions_row_pZi=pd.Series(data=pZi.subs(beta_2_Z,mortality_params_df_values["beta2"][row[0]]).subs(beta_1_Z,mortality_params_df_values["beta1"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            #supstituiting sigma_i with the critical illness corresponding sigma
+            if row[0]=='SU':
+                pZi_sigrep=pZi.subs(sigma_i,sigma_SU)
+            elif row[0]=='MU':
+                pZi_sigrep=pZi.subs(sigma_i,sigma_MU)
+            elif row[0]=='R':
+                pZi_sigrep=pZi.subs(sigma_i,sigma_R)
+            transitional_probability_expressions_row_pZi=pd.Series(data=pZi_sigrep.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta1"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
             transitional_probability_expressions_pZi=pd.concat([transitional_probability_expressions_pZi,transitional_probability_expressions_row_pZi], axis=0)
             expressiontypes.append("pZi")
         else:
@@ -44,6 +53,7 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
 
     transitional_probability_expressions_all_series=pd.concat([transitional_probability_expressions_pii,transitional_probability_expressions_pZi,transitional_probability_expressions_pZZ], axis=0)
     transitional_probability_expressions_all_df=pd.DataFrame(data={'expression':transitional_probability_expressions_all_series,'expressiontype':expressiontypes},index=transitional_probability_expressions_all_series.index)
-  
-    print(type(transitional_probability_expressions_all_df))
-    pass
+    
+    print('tpf')
+    return transitional_probability_expressions_all_df
+    

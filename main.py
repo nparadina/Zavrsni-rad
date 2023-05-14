@@ -54,14 +54,16 @@ for res in minimizer_results_list:
 critical_illnesses=CRITICAL_ILLNESSES.copy()
 critical_illnesses.append("ZM") # expend the list adding the row for healthy to dead from other causes probability
 mortality_params_df=pd.DataFrame(mortality_params_list,index=critical_illnesses, columns=mortality_model_parameters_labels)
-    
+
+print('Here1')    
 transitional_probabilities_expressions_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0,t1)
 
 #dummy test data
 average_prevalance_rates_all_df= pd.DataFrame(data={'65-105':[6.51,1.10,2.63],'20-64':[1.54,0.30,0.37]}, index=CRITICAL_ILLNESSES)
 #pass the parameters to define transitional probabilities expressions
 
-print(pre.prevalence_rate_equation(transitional_probabilities_expressions_all,average_prevalance_rates_all_df))
+print('Here2')    
+print(pre.prevalence_rates_equations(transitional_probabilities_expressions_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES))
 
 pass
 
