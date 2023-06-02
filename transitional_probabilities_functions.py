@@ -15,7 +15,7 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
     const2=sm.exp(beta_1_i)/beta_2_i
 
     #the probabilty of staying healthy starting from age x till x+t
-    pZZ=sm.exp(-const1*(sm.exp(beta_2_Z*x))-sm.exp(beta_2_Z*x)-(sigma_R+sigma_SU+sigma_MU)*t)
+    pZZ=sm.exp(-const1*(sm.exp(beta_2_Z*(x+t)))-sm.exp(beta_2_Z*x)-(sigma_R+sigma_SU+sigma_MU)*t)
         #the probabilty of being ill from sickness i starting from age x till x+t - check if at all needed
     pii=sm.exp(-const1*(sm.exp(beta_2_Z*(x+t))-sm.exp(beta_2_Z*x))-const2*(sm.exp(beta_2_i*(x+t))-sm.exp(beta_2_i*x)))
     #iterate over diseses, calulcate pZi ofr each, add to list

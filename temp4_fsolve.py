@@ -20,9 +20,11 @@ counter=0
 ct1 = dt.datetime.now()
 print(ct1)
 
-while np.any(z<=0):
-    counter+=1
-    z= fsolve(equations, myGuess)
+z= fsolve(equations, myGuess)
+
+# while np.any(z<=0):
+#     counter+=1
+#     z= fsolve(equations, myGuess)
 
 ct2=dt.datetime.now()
 print(ct2-ct1)
