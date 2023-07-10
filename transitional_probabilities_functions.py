@@ -11,17 +11,26 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
     beta_1_Z,beta_2_Z,beta_1_i,beta_2_i,x,t,sigma_R,sigma_SU,sigma_MU,sigma_i=sm.symbols("beta_1_Z,beta_2_Z,beta_1_i,beta_2_i,x,t,sigma_R,sigma_SU,sigma_MU,sigma_i")
     const1,const2=sm.symbols("const1,const2")
 
-    const1=sm.exp(beta_1_Z)/beta_2_Z
-    const2=sm.exp(beta_1_i)/beta_2_i
+    # const1=sm.exp(beta_1_Z)/beta_2_Z
+    # const2=sm.exp(beta_1_i)/beta_2_i
 
+    # #the probabilty of staying healthy starting from age x till x+t
+    # pZZ=sm.exp(-const1*(sm.exp(beta_2_Z*(x+t)))-sm.exp(beta_2_Z*x)-(sigma_R+sigma_SU+sigma_MU)*t)
+    # #the probabilty of being ill from sickness i starting from age x till x+t
+    # pii=sm.exp(-const1*(sm.exp(beta_2_Z*(x+t))-sm.exp(beta_2_Z*x))-const2*(sm.exp(beta_2_i*(x+t))-sm.exp(beta_2_i*x)))
+    # #the probabilty of becomming ill from sickness i starting from age x till x+t when healty
+    # pZi=sm.exp(const1*sm.exp(beta_2_Z*x)*(1-beta_2_Z*t))*sm.exp(-const2*sm.exp(beta_2_i*(x+t))+const2*sm.exp(beta_2_i*(x+t/2))*(1-beta_2_i*t/2))*sigma_i/(-(sigma_R+sigma_SU+sigma_MU)+sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2)))*sm.exp((sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2))-(sigma_R+sigma_SU+sigma_MU))*t-1)
+     
+    #without const
     #the probabilty of staying healthy starting from age x till x+t
-    pZZ=sm.exp(-const1*(sm.exp(beta_2_Z*(x+t)))-sm.exp(beta_2_Z*x)-(sigma_R+sigma_SU+sigma_MU)*t)
-        #the probabilty of being ill from sickness i starting from age x till x+t - check if at all needed
-    pii=sm.exp(-const1*(sm.exp(beta_2_Z*(x+t))-sm.exp(beta_2_Z*x))-const2*(sm.exp(beta_2_i*(x+t))-sm.exp(beta_2_i*x)))
-    #iterate over diseses, calulcate pZi ofr each, add to list
-    pZi=sm.exp(const1*sm.exp(beta_2_Z*x)*(1-beta_2_Z*t))*sm.exp(-const2*sm.exp(beta_2_i*(x+t))+const2*sm.exp(beta_2_i*(x+t/2))*(1-beta_2_i*t/2))*sigma_i/(-(sigma_R+sigma_SU+sigma_MU)+sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2)))*sm.exp((sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2))-(sigma_R+sigma_SU+sigma_MU))*t-1)
-    #set Gomepert values to get the return pZi 
-    
+    pZZ=sm.exp(-sm.exp(beta_1_Z)/beta_2_Z*(sm.exp(beta_2_Z*(x+t)))-sm.exp(beta_2_Z*x)-(sigma_R+sigma_SU+sigma_MU)*t)
+    #the probabilty of being ill from sickness i starting from age x till x+t
+    pii=sm.exp(-sm.exp(beta_1_Z)/beta_2_Z*(sm.exp(beta_2_Z*(x+t))-sm.exp(beta_2_Z*x))-sm.exp(beta_1_i)/beta_2_i*(sm.exp(beta_2_i*(x+t))-sm.exp(beta_2_i*x)))
+    #the probabilty of becomming ill from sickness i starting from age x till x+t when healty
+    pZi=sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)*(1-beta_2_Z*t))*sm.exp(-sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t))+sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t/2))*(1-beta_2_i*t/2))*sigma_i/(-(sigma_R+sigma_SU+sigma_MU)+sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2)))*sm.exp((sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2))-(sigma_R+sigma_SU+sigma_MU))*t-1)
+
+
+
     transitional_probability_expressions_pii=pd.Series(dtype=str)
     transitional_probability_expressions_pZi=pd.Series(dtype=str)
     transitional_probability_expressions_pZZ=pd.Series(dtype=str)
@@ -34,7 +43,7 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
     #supstituting varibales with numerical values
     for row in mortality_params_df_values.itertuples():
         if row[0]!="ZM":
-            transitional_probability_expressions_row_pii=pd.Series(data=pii.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta1"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            transitional_probability_expressions_row_pii=pd.Series(data=pii.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta2"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
             transitional_probability_expressions_pii=pd.concat([transitional_probability_expressions_pii,transitional_probability_expressions_row_pii], axis=0)
             expressiontypes.append("pii")
             #supstituiting sigma_i with the critical illness corresponding sigma
