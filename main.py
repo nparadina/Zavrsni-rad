@@ -20,7 +20,7 @@ agegroupsno=2
 #First age group from 20-64, second age group from 65-105, age list with limit ages
 age=[65,105]
 t1=age[0]-x0
-t2=age[1]-age[0]
+t2=age[1]-age[0] 
 
 
 

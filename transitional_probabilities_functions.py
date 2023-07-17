@@ -23,11 +23,17 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
      
     #without const
     #the probabilty of staying healthy starting from age x till x+t
-    pZZ=sm.exp(-sm.exp(beta_1_Z)/beta_2_Z*(sm.exp(beta_2_Z*(x+t)))-sm.exp(beta_2_Z*x)-(sigma_R+sigma_SU+sigma_MU)*t)
+    pZZ=sm.exp(-sm.exp(beta_1_Z)/beta_2_Z*(sm.exp(beta_2_Z*(x+t))-sm.exp(beta_2_Z*x))-(sigma_R+sigma_SU+sigma_MU)*t)
     #the probabilty of being ill from sickness i starting from age x till x+t
     pii=sm.exp(-sm.exp(beta_1_Z)/beta_2_Z*(sm.exp(beta_2_Z*(x+t))-sm.exp(beta_2_Z*x))-sm.exp(beta_1_i)/beta_2_i*(sm.exp(beta_2_i*(x+t))-sm.exp(beta_2_i*x)))
     #the probabilty of becomming ill from sickness i starting from age x till x+t when healty
-    pZi=sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)*(1-beta_2_Z*t))*sm.exp(-sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t))+sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t/2))*(1-beta_2_i*t/2))*sigma_i/(-(sigma_R+sigma_SU+sigma_MU)+sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2)))*sm.exp((sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2))-(sigma_R+sigma_SU+sigma_MU))*t-1)
+    pZi=sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)*(1-sm.exp(beta_2_Z*t)))*sm.exp(-sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t))+sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t/2))*(1-beta_2_i*t/2))*sigma_i/(-(sigma_R+sigma_SU+sigma_MU)+sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2)))*sm.exp((sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2))-(sigma_R+sigma_SU+sigma_MU))*t-1)
+    #tmp to test the printing
+    #sm.init_printing()
+    #print(pii)
+    #print(sm.pretty(pZZ))
+    #print(pZi)
+    #sm.pprint(pZi)
 
 
 
@@ -53,7 +59,7 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
                 pZi_sigrep=pZi.subs(sigma_i,sigma_MU)
             elif row[0]=='R':
                 pZi_sigrep=pZi.subs(sigma_i,sigma_R)
-            transitional_probability_expressions_row_pZi=pd.Series(data=pZi_sigrep.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta1"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            transitional_probability_expressions_row_pZi=pd.Series(data=pZi_sigrep.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta2"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
             transitional_probability_expressions_pZi=pd.concat([transitional_probability_expressions_pZi,transitional_probability_expressions_row_pZi], axis=0)
             expressiontypes.append("pZi")
         else:
@@ -61,6 +67,7 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
             expressiontypes.append("pZZ")
 
     transitional_probability_expressions_all_series=pd.concat([transitional_probability_expressions_pii,transitional_probability_expressions_pZi,transitional_probability_expressions_pZZ], axis=0)
+    expressiontypes.sort(reverse=True)
     transitional_probability_expressions_all_df=pd.DataFrame(data={'expression':transitional_probability_expressions_all_series,'expressiontype':expressiontypes},index=transitional_probability_expressions_all_series.index)
     
     print('tpf')
