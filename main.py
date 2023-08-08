@@ -5,8 +5,9 @@ from model_fitting_gompertz import *
 import numpy as np
 import transitional_probabilities_functions as tpf
 import prevalence_rates_equations as pre
+import datetime as dt
 
-
+ct1 = dt.datetime.now()
 #Setting product variables, in next iteration could be repurpused to be used as web interface
 # insurable age start
 x0=20
@@ -63,8 +64,10 @@ average_prevalance_rates_all_df= pd.DataFrame(data={'65-105':[6.51,1.10,2.63],'2
 #pass the parameters to define transitional probabilities expressions
 
 print('Here2')    
-print(pre.prevalence_rates_equations(transitional_probabilities_expressions_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES))
+maliPero=pre.prevalence_rates_equations(transitional_probabilities_expressions_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
 
+ct2=dt.datetime.now()
+print(ct2-ct1)
 pass
 
 #piece-wise contant trans

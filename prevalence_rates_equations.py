@@ -44,8 +44,12 @@ def prevalence_rates_equations (transitional_probability_expressions_all, averag
         pii=sm.sympify(exp_df.at[illness,'pii'].loc[~exp_df.at[illness,'pii'].eq('')].at[illness])
         new_exp_i=f_i-pZi/(pZZ+sum_Pzis)
         new_exp_i=new_exp_i.subs(f_i,average_prevalance_rates_all.at[illness,'20-64'])
-        eq_list.append(sm.Eq(new_exp_i,0))
-        pass
+        eq_list.append(new_exp_i)
+        #Back when sm.nsolve was in play and Equatoins were needed
+        #eq_list.append(sm.Eq(new_exp_i,0))
     print('pre')
-    ses.solve_equations_set(eq_list)
-
+    initialStepwiseProbabilityObject=ses.StepwiseProbabilty(eq_list)
+    initialStepwiseProbabilityObject.fsolve_stepwise()
+    
+    return initialStepwiseProbabilityObject
+     

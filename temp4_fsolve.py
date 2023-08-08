@@ -1,6 +1,5 @@
 from scipy.optimize import fsolve
 import numpy as np
-import math
 import datetime as dt
 import random
 
@@ -15,6 +14,7 @@ def equations(z):
     return f
 
 #myGuess=np.array([0.0000813,0.0000202,0.001806421])
+#myGuess=[0.00076082, 0.00051096, 0.00394945]
 myGuess=np.array([random.uniform(0, 0.01),random.uniform(0, 0.01),random.uniform(0, 0.01)])
 z=np.array([0,0,0])
 counter=0
@@ -26,11 +26,16 @@ z=fsolve(equations, myGuess)
 
 while np.any(z<=0):
     counter+=1
+    print(counter)
+    print(myGuess)
     myGuess=np.array([random.uniform(0, 0.01),random.uniform(0, 0.01),random.uniform(0, 0.01)])
     z= fsolve(equations, myGuess)
 
 ct2=dt.datetime.now()
 print(ct2-ct1)
+print (myGuess)
 print(z)
+print(counter)
+
 #print(counter)
 pass
