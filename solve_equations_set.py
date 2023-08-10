@@ -25,8 +25,9 @@ class StepwiseProbabilty:
         return f    
     def fsolve_stepwise(self):
         #self.myGuess=np.array([random.uniform(0, 0.01),random.uniform(0, 0.01),random.uniform(0, 0.01)])
-        #self.myGuess=[0.00076082, 0.00051096, 0.00394945]
-        self.myGuess=[random.uniform(0, 0.01),random.uniform(0, 0.01),random.uniform(0, 0.01)]
+        self.myGuess=[0.00076082, 0.00051096, 0.00394945]
+        #self.myGuess=[0.00320263, 0.00210728, 0.0074981]
+        #self.myGuess=[random.uniform(0, 0.01),random.uniform(0, 0.01),random.uniform(0, 0.01)]
         self.sol=np.array([0,0,0])
         self.counter=0
         #measure time to find solution

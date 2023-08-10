@@ -57,14 +57,17 @@ critical_illnesses.append("ZM") # expend the list adding the row for healthy to 
 mortality_params_df=pd.DataFrame(mortality_params_list,index=critical_illnesses, columns=mortality_model_parameters_labels)
 
 print('Here1')    
-transitional_probabilities_expressions_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0,t1)
+transitional_probabilities_expressions_initial_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0,t1)
+transitional_probabilities_expressions_second_age_group_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0+t1,t2)
 
 #dummy test data
 average_prevalance_rates_all_df= pd.DataFrame(data={'65-105':[6.51,1.10,2.63],'20-64':[1.54,0.30,0.37]}, index=CRITICAL_ILLNESSES)
 #pass the parameters to define transitional probabilities expressions
 
 print('Here2')    
-maliPero=pre.prevalence_rates_equations(transitional_probabilities_expressions_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
+maliPero=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
+print(maliPero.sol)
+print(maliPero.myGuess)
 
 ct2=dt.datetime.now()
 print(ct2-ct1)
