@@ -56,7 +56,7 @@ critical_illnesses=CRITICAL_ILLNESSES.copy()
 critical_illnesses.append("ZM") # expend the list adding the row for healthy to dead from other causes probability
 mortality_params_df=pd.DataFrame(mortality_params_list,index=critical_illnesses, columns=mortality_model_parameters_labels)
 
-print('Here1')    
+print('Defining transitional probablities expression')    
 transitional_probabilities_expressions_initial_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0,t1)
 transitional_probabilities_expressions_second_age_group_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0+t1,t2)
 
@@ -64,10 +64,14 @@ transitional_probabilities_expressions_second_age_group_all=tpf.define_transitio
 average_prevalance_rates_all_df= pd.DataFrame(data={'65-105':[6.51,1.10,2.63],'20-64':[1.54,0.30,0.37]}, index=CRITICAL_ILLNESSES)
 #pass the parameters to define transitional probabilities expressions
 
-print('Here2')    
-maliPero=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
+
+print('Solving nonlinear equations')      
+maliPero, maliIvo=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
 print(maliPero.sol)
 print(maliPero.myGuess)
+
+print(maliIvo.sol)
+print(maliIvo.myGuess)
 
 ct2=dt.datetime.now()
 print(ct2-ct1)

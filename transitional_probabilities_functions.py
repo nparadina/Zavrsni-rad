@@ -69,7 +69,6 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
     transitional_probability_expressions_all_series=pd.concat([transitional_probability_expressions_pii,transitional_probability_expressions_pZi,transitional_probability_expressions_pZZ], axis=0)
     expressiontypes.sort(reverse=True)
     transitional_probability_expressions_all_df=pd.DataFrame(data={'expression':transitional_probability_expressions_all_series,'expressiontype':expressiontypes},index=transitional_probability_expressions_all_series.index)
-    
-    print('tpf')
+
     return transitional_probability_expressions_all_df
     

@@ -23,10 +23,9 @@ class StepwiseProbabilty:
         f[1]=self.equation_list[1].subs(self.sigma_SU,sigma_SU_lokal).subs(self.sigma_MU,sigma_MU_lokal).subs(self.sigma_R,sigma_R_lokal)
         f[2]=self.equation_list[2].subs(self.sigma_SU,sigma_SU_lokal).subs(self.sigma_MU,sigma_MU_lokal).subs(self.sigma_R,sigma_R_lokal)
         return f    
-    def fsolve_stepwise(self):
-        #self.myGuess=np.array([random.uniform(0, 0.01),random.uniform(0, 0.01),random.uniform(0, 0.01)])
-        self.myGuess=[0.00076082, 0.00051096, 0.00394945]
-        #self.myGuess=[0.00320263, 0.00210728, 0.0074981]
+    def fsolve_stepwise(self, myGuess=np.array([random.uniform(0, 0.01),random.uniform(0, 0.01),random.uniform(0, 0.01)])):
+        self.myGuess=myGuess
+        #self.myGuess=[0.00076082, 0.00051096, 0.00394945]
         #self.myGuess=[random.uniform(0, 0.01),random.uniform(0, 0.01),random.uniform(0, 0.01)]
         self.sol=np.array([0,0,0])
         self.counter=0
@@ -44,9 +43,9 @@ class StepwiseProbabilty:
         #ct2=dt.datetime.now()
         #print(ct2-ct1)
                 
-        #print(self.myGuess)
-        #print(self.sol)
-        #print(self.counter)
+        # print(self.myGuess)
+        # print(self.sol)
+        # print(self.counter)
        
 
 #OLD SOLUTION WITH NSOLVE AND FUNCTION, DELETE IF FSOLVE AND CLASS WORK
