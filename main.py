@@ -5,23 +5,28 @@ from model_fitting_gompertz import *
 import numpy as np
 import transitional_probabilities_functions as tpf
 import prevalence_rates_equations as pre
+import determine_price as dp
 import datetime as dt
 
 ct1 = dt.datetime.now()
 #Setting product variables, in next iteration could be repurpused to be used as web interface
 # insurable age start
 x0=20
+#policy duration
+N=20
 
 #Setting data for modelling
 path_death_probabilities='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Vjerojatnost smrti populacije od kriticnih bolesti i zdravih od ostalih bolesti.xlsx'
 path_initial_Gompertz_parameteres='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Inijalni parametri GM Modela.xlsx'
 #Setting paraemeters for transitional_probabilities_expressions
-#Number of age groups, agegroupsno
+#Number of age groups, agegroupsno, posibily to delete
 agegroupsno=2
 #First age group from 20-64, second age group from 65-105, age list with limit ages
-age=[65,105]
-t1=age[0]-x0
-t2=age[1]-age[0] 
+age_group_limits=[65,105]
+t1=age_group_limits[0]-x0
+t2=age_group_limits[1]-age_group_limits[0]
+#Setting parameters for a constant force of interest
+delta=0.002
 
 
 
@@ -66,12 +71,12 @@ average_prevalance_rates_all_df= pd.DataFrame(data={'65-105':[6.51,1.10,2.63],'2
 
 
 print('Solving nonlinear equations')      
-maliPero, maliIvo=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
-print(maliPero.sol)
-print(maliPero.myGuess)
+initial_stepwise_intensity, second_stepwise_intensity=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
 
-print(maliIvo.sol)
-print(maliIvo.myGuess)
+ct2=dt.datetime.now()
+print(ct2-ct1)
+
+product_prices=dp.determine_price(x0,N,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits)
 
 ct2=dt.datetime.now()
 print(ct2-ct1)
