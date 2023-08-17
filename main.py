@@ -13,7 +13,7 @@ ct1 = dt.datetime.now()
 # insurable age start
 x0=20
 #policy duration
-N=20
+N=43
 
 #Setting data for modelling
 path_death_probabilities='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Vjerojatnost smrti populacije od kriticnih bolesti i zdravih od ostalih bolesti.xlsx'
@@ -76,7 +76,7 @@ initial_stepwise_intensity, second_stepwise_intensity=pre.prevalence_rates_equat
 ct2=dt.datetime.now()
 print(ct2-ct1)
 
-product_prices=dp.determine_price(x0,N,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits)
+product_prices=dp.determine_price(x0,N,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df)
 
 ct2=dt.datetime.now()
 print(ct2-ct1)
