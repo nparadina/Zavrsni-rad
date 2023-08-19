@@ -11,9 +11,15 @@ import datetime as dt
 ct1 = dt.datetime.now()
 #Setting product variables, in next iteration could be repurpused to be used as web interface
 # insurable age start
-x0=20
+x0=38
 #policy duration
-N=43
+n=10
+#insurance payments for critical illnesses
+ssu=20000
+smu=20000
+sr=20000
+#insurance payment in case of death to other causes
+s=50000
 
 #Setting data for modelling
 path_death_probabilities='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Vjerojatnost smrti populacije od kriticnih bolesti i zdravih od ostalih bolesti.xlsx'
@@ -26,17 +32,8 @@ age_group_limits=[65,105]
 t1=age_group_limits[0]-x0
 t2=age_group_limits[1]-age_group_limits[0]
 #Setting parameters for a constant force of interest
-delta=0.002
+delta=0.05
 
-
-
-#Setting insured's variable
-#age at insurance contract
-x=20
-# incurance period
-n=40
-#insured sum, in €
-S=20000
 #insured critical illnesses - A CONSTANT
 CRITICAL_ILLNESSES=['SU','MU','R']
 #parameters of a mortality model
@@ -76,7 +73,7 @@ initial_stepwise_intensity, second_stepwise_intensity=pre.prevalence_rates_equat
 ct2=dt.datetime.now()
 print(ct2-ct1)
 
-product_prices=dp.determine_price(x0,N,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df)
+product_prices=dp.determine_price(x0,n,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df,ssu,smu,sr,s)
 
 ct2=dt.datetime.now()
 print(ct2-ct1)
