@@ -142,6 +142,6 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
         pii_second_age_group=sm.sympify(exp_df_second_age_group.at[illness,'pii'].loc[~exp_df_second_age_group.at[illness,'pii'].eq('')].at[illness])
         pii_calculated_second_age_group_df_data=pd.DataFrame(data={"pii":pii_second_age_group,"pZi":'',"pZZ":''}, index=[illness])
         second_age_group_calculated_probabilities=pd.concat([pii_calculated_second_age_group_df_data,second_age_group_calculated_probabilities])
-
+    print("I have calculated")
     return initialStepwiseProbabilityObject,secondStepwiseProbabilityObject
      

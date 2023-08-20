@@ -76,7 +76,9 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
             hj=hj+1
             current_age=current_age+1
             iteration=iteration+1
-    
+    #the price of the insurance for CI and life combined is the sum of the both components
+    print(price_CI_life)
+    price_CI_life=price_CI+price_CI_life
     print(price_CI)
     print(price_CI_life)
     pass
