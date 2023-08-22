@@ -82,7 +82,10 @@ print('*******Defining transitional probablities expression******')
 to determine the stepwise constant transitional intensities other than mortality rate calculated according to GM 
 """
 transitional_probabilities_expressions_initial_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0,t1)
-transitional_probabilities_expressions_second_age_group_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0+t1,t2)
+if t2>0:#if the insurance continues into the second age group 
+    transitional_probabilities_expressions_second_age_group_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0+t1,t2)
+else:#if the insurance stops before the second age group, create the empty dataframe
+    transitional_probabilities_expressions_second_age_group_all=pd.DataFrame()
 
 """ 
 Load calculated data about prevalence rates
@@ -93,7 +96,6 @@ average_prevalance_rates_all_df= pd.read_excel(path_prevalence_rates)
 average_prevalance_rates_all_df.set_index('illness', inplace=True)
 
 #just a helper to time execution
-
 ct2=dt.datetime.now()
 print("Time to set up for step-wise probabilties: ", ct2-ct1)
 
@@ -111,24 +113,15 @@ and known average prevalance rate we create a nonlinear set of equations
 initial_stepwise_intensity, second_stepwise_intensity=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
 
 """ 
-TBD
-""" 
+Combining the information in about stepwise transitional intensities
+and the parameters decided upon at the time of policy definition
+the function determine_price returns the net premium of such a product
 
+The mathematical beackgroup to the pricing formula is presented in the paper
+""" 
 product_prices=dp.determine_price(x0,n,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df,ssu,smu,sr,s)
 
 ct2=dt.datetime.now()
 print(ct2-ct1)
 pass
-
-#piece-wise contant trans
-
-# call get prevalence data - database, calulate the number of unique age groups, get age boundries
-#per prevalance date age group, 
-    #call transitional_probabilities_functions function, get equatoins with parameters
-    #call prevalence_rates_equations, get equations from prevalnce rates
-    #call solve_equations, solve for sigmas
-    #write sigmas to dataframe or list
-
-#call calc premium rates 
-
 

@@ -6,6 +6,16 @@ import transitional_probabilities_functions as tp
 from IPython.display import display
 import solve_equations_set as ses
 
+""" 
+Combining the information in about stepwise transitional intensities
+and the parameters decided upon at the time of policy definition
+the function determine_price returns the net premium of such a product
+
+We are calculated the prices of a stand alone critical illnesses insurance product and
+a product that combines critical illnesses insurance and life insurance.
+
+The mathematical beackgroup to the pricing formula is presented in the paper
+""" 
 def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,force_of_interest,mortality_params_df_values,comp_su,comp_mu,comp_r,comp):
     print("Entering price determination")
     
@@ -17,18 +27,19 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
     hj=1
   
     #defining equations for price calculation
-    #separation in subintegral parts is only in oder to make the code easier to read
+    #separation in subintegral parts is only in order to make the code easier to read
     #in reality these are not subintegrals, but the solutions to the subintegrals
+    #see paper for the pricing formula
 
     #const is the same with CI stand alone product and a CI + life (risico) product
     const=sm.exp(beta_1_Z)*sm.exp(beta_2_Z)*(x+(hj-hi)/2)
     
-    #CI standalone
+    #CI standalone product
     CI_only_subintegral_part1= ((sm.exp(-hi*(sigma_R+sigma_SU+sigma_MU+const+delta))-sm.exp(-hj*(sigma_R+sigma_SU+sigma_MU+const+delta)))*(sr*sigma_R+ssu*sigma_SU+smu*sigma_MU))/(sigma_R+sigma_SU+sigma_MU+const+delta)
     CI_only_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj-hi)/2))
     CI_only_subintegral=CI_only_subintegral_part1*CI_only_subintegral_part2
     
-    #CI + life
+    #CI + life product
     CI_life_subintegral_part1= s*((sm.exp(-hi*(sigma_R+sigma_SU+sigma_MU+const+delta-beta_2_Z))-sm.exp(-hj*(sigma_R+sigma_SU+sigma_MU+const+delta-beta_2_Z)))*(sm.exp(beta_1_Z+beta_2_Z*x)))/(sigma_R+sigma_SU+sigma_MU+const+delta-beta_2_Z)
     CI_life_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj-hi)/2))
     CI_life_subintegral=CI_life_subintegral_part1*CI_life_subintegral_part2
@@ -55,10 +66,12 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
     # print("Sumsigmas2:", sum_sigmas_second)
 
 
-    # determining the price for only CI insurance
+    # determining the price for all products
     while iteration < (policy_duration):
         if current_age<age_group_limits[0]:
+            #stnad alone CI
             price_CI=price_CI+CI_only_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(sr,comp_r).subs(ssu,comp_su).subs(smu,comp_mu)
+            #life component of a product combining CI and life
             price_CI_life=price_CI_life+CI_life_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(s,comp)
             #prints for debugging
             # print("const: ", const.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(x,current_age))
@@ -69,14 +82,23 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
             hj=hj+1
             current_age=current_age+1
             iteration=iteration+1
-        if  current_age<age_group_limits[1] and current_age>=age_group_limits[0] :
+        """
+        To even take into the account the second age group "cost" the insurers age has to be above the second age group limit
+        but not higher than the overall last supšport age, her 105
+        Also the length of the insurance period and the starting age determine if the second age group probabilities 
+        even play a part in the calculation
+        When no second age group probabilties were calcualted the second_stepwise_intensity object is empty
+        """
+        if  current_age<age_group_limits[1] and current_age>=age_group_limits[0] and ~second_stepwise_intensity.is_empty():
             price_CI=price_CI+CI_only_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,second_stepwise_intensity.sol[0]).subs(sigma_SU,second_stepwise_intensity.sol[1]).subs(sigma_MU,second_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(sr,comp_r).subs(ssu,comp_su).subs(smu,comp_mu)
             price_CI_life=price_CI_life+CI_life_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(s,comp)
             hi=hi+1
             hj=hj+1
             current_age=current_age+1
             iteration=iteration+1
+    
     #the price of the insurance for CI and life combined is the sum of the both components
+    #TBD set return !!!!
     print(price_CI_life)
     price_CI_life=price_CI+price_CI_life
     print(price_CI)
