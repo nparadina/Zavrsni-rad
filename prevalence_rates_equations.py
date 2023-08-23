@@ -10,10 +10,11 @@ from optional import Optional
 
 
 def prevalence_rates_equations (transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all, average_prevalance_rates_all,CRITICAL_ILLNESSES):
-    #Define as function, add pZZ_initial, pZi_initial list, no list argument as paramters
-
-    #Initialisation - Define initial age group symbols and variables
+     
+    #initilize the symbol for prevalnce rates, will be filled with values from average_prevalance_rates_all
     f_i=sm.symbols("f_i")
+    
+    #Initialisation - Define initial age group symbols and variables
     pZZ_initial,pZi_initial,pii_initial=sm.symbols("pZZ_initial,pZi_initial,pii_initial")
     beta_1_Z,beta_2_Z,beta_1_i,beta_2_i,x,t,sigma_R,sigma_SU,sigma_MU,sigma_i=sm.symbols("beta_1_Z,beta_2_Z,beta_1_i,beta_2_i,x,t,sigma_R,sigma_SU,sigma_MU,sigma_i")
     #
@@ -193,6 +194,8 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
         second_age_group_calculated_probabilities=pd.DataFrame(columns=['pii','pZi','pZZ'])
             
         for illness in CRITICAL_ILLNESSES:
+            #substitute with calculates sigmas store in sol
+            pZi_calculated_initial=pZi_initial.subs(sigma_R,initialStepwiseProbabilityObject.sol[0]).subs(sigma_SU,initialStepwiseProbabilityObject.sol[1]).subs(sigma_MU,initialStepwiseProbabilityObject.sol[2])
             #the probabilities from x0+t1 up to x0+t2 we have already calculated in exp_df_second_age_group, logic beneath calculates the x0 up to x0+t1+t2 probablity
             #mathematical background to be found in the paper
             pZi_up_to_second_age_group=pZi_calculated_initial*sm.sympify(exp_df_second_age_group.at[illness,'pii'].loc[~exp_df_second_age_group.at[illness,'pii'].eq('')].at[illness])+pZZ_calculated_initial*sm.sympify(exp_df_second_age_group.at[illness,'pZi'].loc[~exp_df_second_age_group.at[illness,'pZi'].eq('')].at[illness])
@@ -238,7 +241,7 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
             second_age_group_calculated_probabilities=pd.concat([pii_calculated_second_age_group_df_data,second_age_group_calculated_probabilities])
     
         print("Both object instantiated")
-        return initialStepwiseProbabilityObject,secondStepwiseProbabilityObject
+        return initialStepwiseProbabilityObject,secondStepwiseProbabilityObject, initial_calculated_probabilities, second_age_group_calculated_probabilities
     else:#second age group was never taken into consideration so a secondStepwiseProbabilityObject doesn+t exist
-        return initialStepwiseProbabilityObject,Optional.empty()
+        return initialStepwiseProbabilityObject,Optional.empty(),initial_calculated_probabilities,Optional.empty()
      

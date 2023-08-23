@@ -14,13 +14,13 @@ ct1 = dt.datetime.now()
 # insurable age start
 x0=38
 #policy duration
-n=10
+n=40
 #insurance payments for critical illnesses, in €
 ssu=20000
 smu=20000
 sr=20000
 #insurance payment in case of death to other causes, in €
-s=10000
+s=20000
 
 #Setting data for modelling, Excel Sheets
 #TBD Get the data from DB, set these path as commentary
@@ -110,7 +110,7 @@ and known average prevalance rate we create a nonlinear set of equations
 -As a seed the fsolve, a random number will be generated within the limits provided from previos similar papers
 -Both initial_stepwise_intensity and second_stepwise_intensity are objects of a custom defined class StepwiseProbabilty
 """ 
-initial_stepwise_intensity, second_stepwise_intensity=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
+initial_stepwise_intensity, second_stepwise_intensity, initial_calculated_probabilities, second_age_group_calculated_probabilities=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
 
 """ 
 Combining the information in about stepwise transitional intensities
@@ -119,7 +119,21 @@ the function determine_price returns the net premium of such a product
 
 The mathematical beackgroup to the pricing formula is presented in the paper
 """ 
-product_prices=dp.determine_price(x0,n,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df,ssu,smu,sr,s)
+product_price_CI, product_price_life, product_price_CI_life =dp.determine_price(x0,n,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df,ssu,smu,sr,s)
+
+print("Product standalon CI:", product_price_CI)
+print("Product price just life component: ", product_price_life)
+print("Product standalon CI and life component:", product_price_CI_life)
+
+print("initial_calculated_probabilities: ", initial_calculated_probabilities)
+print("initial sigmas:",initial_stepwise_intensity.sol)
+
+if type(second_stepwise_intensity)!="Optional.empty()":
+    print("second_age_group_calculated_probabilities: ", second_age_group_calculated_probabilities)
+    print("second age group sigmas: ", second_stepwise_intensity.sol)
+else:
+    print ("Second age group empty: ",type(second_stepwise_intensity)=="Optional.empty()")
+
 
 ct2=dt.datetime.now()
 print(ct2-ct1)

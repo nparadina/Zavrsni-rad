@@ -5,6 +5,7 @@ import sympy as sm
 import transitional_probabilities_functions as tp
 from IPython.display import display
 import solve_equations_set as ses
+from optional import Optional
 
 """ 
 Combining the information in about stepwise transitional intensities
@@ -89,18 +90,18 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
         even play a part in the calculation
         When no second age group probabilties were calcualted the second_stepwise_intensity object is empty
         """
-        if  current_age<age_group_limits[1] and current_age>=age_group_limits[0] and ~second_stepwise_intensity.is_empty():
+        if  current_age<age_group_limits[1] and current_age>=age_group_limits[0] and type(second_stepwise_intensity)!="Optional.empty()":
             price_CI=price_CI+CI_only_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,second_stepwise_intensity.sol[0]).subs(sigma_SU,second_stepwise_intensity.sol[1]).subs(sigma_MU,second_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(sr,comp_r).subs(ssu,comp_su).subs(smu,comp_mu)
             price_CI_life=price_CI_life+CI_life_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(s,comp)
             hi=hi+1
             hj=hj+1
             current_age=current_age+1
             iteration=iteration+1
+            print("I have been in a second age group")
     
     #the price of the insurance for CI and life combined is the sum of the both components
-    #TBD set return !!!!
-    print(price_CI_life)
-    price_CI_life=price_CI+price_CI_life
     print(price_CI)
     print(price_CI_life)
-    pass
+    print(price_CI+price_CI_life)
+
+    return price_CI, price_CI_life, price_CI+price_CI_life
