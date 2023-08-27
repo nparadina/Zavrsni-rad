@@ -1,10 +1,13 @@
 import math as m
+import random
 import pandas as pd
 import scipy.integrate as integrate
 import sympy as sm
+import numpy as np
 import transitional_probabilities_functions as tp
 from IPython.display import display
 import solve_equations_set as ses
+import calculate_probabilities as cp
 #repository to return the information that an object doesn+t exist
 from optional import Optional
 
@@ -16,7 +19,7 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
     
     #Initialisation - Define initial age group symbols and variables
     pZZ_initial,pZi_initial,pii_initial=sm.symbols("pZZ_initial,pZi_initial,pii_initial")
-    beta_1_Z,beta_2_Z,beta_1_i,beta_2_i,x,t,sigma_R,sigma_SU,sigma_MU,sigma_i=sm.symbols("beta_1_Z,beta_2_Z,beta_1_i,beta_2_i,x,t,sigma_R,sigma_SU,sigma_MU,sigma_i")
+    sigma_R,sigma_SU,sigma_MU=sm.symbols("sigma_R,sigma_SU,sigma_MU")
     #
     """
     -exp_df_initial is used to build a dataframe object containing the expression of probabilities received as input
@@ -97,42 +100,42 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
         #fill in eq_list_initial with new_exp_i, building the nonlinear equation set
         eq_list_initial.append(new_exp_i)
         
-    #instantiate the object of a custom class StepwiseProbabilty
-    initialStepwiseProbabilityObject=ses.StepwiseProbabilty(eq_list_initial)
-    #defalut value for myGuess for debugging purposes, if commented out, a default random value will be used
-    myGuess_initial=[0.00076082, 0.00051096, 0.00394945]
-    #solve the nonlinear equation set and update the object with the solution
-    initialStepwiseProbabilityObject.fsolve_stepwise(myGuess_initial)
-   
+ 
     """
-    Once we have the estimated calculated sigmas of the initial age group, we can inclued this values into the
-    equations we started from. The values will be used in second group calculation, if this is needed, based on
-    insurance period. Further, the calculated values can be saved for debugging purposes
-
-    """
-    #Use sigmas to (back)calculate the pZZ value
-    pZZ_calculated_initial=pZZ_initial.subs(sigma_R,initialStepwiseProbabilityObject.sol[0]).subs(sigma_SU,initialStepwiseProbabilityObject.sol[1]).subs(sigma_MU,initialStepwiseProbabilityObject.sol[2])
-    #This temporary dateframe object contains only pZZ, here in order to be concatenated into one df holding all calculated probabilities
-    pZZ_calculated_initial_df_data=pd.DataFrame(data={"pii":'',"pZi":'',"pZZ":pZZ_calculated_initial}, index=['pZZ'])
-    #Using the calculated initial stepwise intensities, build a dataframe object initial_calculated_probabilities; 
-    initial_calculated_probabilities=pd.DataFrame(columns=['pii','pZi','pZZ'])
-    initial_calculated_probabilities=pd.concat([pZZ_calculated_initial_df_data,initial_calculated_probabilities])
+    Within the while loop the sigmas will be fitted and accordingly the possibilities will be calculated.
+    Meanining, once we have the estimated calculated sigmas of the initial age group, we can include this values into the
+    equations we started from.
+    In reality no negative possibilities can be found, so all fitted sigma solutions which result in negative
+    posibilities must be rejected, that is why we remain in the while lop till such solution found
     
-    #looping per illness
-    #TBD -- what if the values are negative, not realistic, shuld be checked and ran again?
-    for illness in CRITICAL_ILLNESSES:
-        #select the probability value from exp_df_initial that mathches the illness at location other than (~) empty (eq(''))
-        pZi_initial=sm.sympify(exp_df_initial.at[illness,'pZi'].loc[~exp_df_initial.at[illness,'pZi'].eq('')].at[illness])
-        #substitute with calculates sigmas store in sol
-        pZi_calculated_initial=pZi_initial.subs(sigma_R,initialStepwiseProbabilityObject.sol[0]).subs(sigma_SU,initialStepwiseProbabilityObject.sol[1]).subs(sigma_MU,initialStepwiseProbabilityObject.sol[2])
-        #temporary dataframe to enable concatenation
-        pZi_calculated_initial_df_data=pd.DataFrame(data={"pii":'',"pZi":pZi_calculated_initial,"pZZ":''}, index=[illness])
-        initial_calculated_probabilities=pd.concat([pZi_calculated_initial_df_data,initial_calculated_probabilities])
-        #pii_initial is indenpented of sigmas, therefore the same as pii_calculated_initial would be
-        pii_initial=sm.sympify(exp_df_initial.at[illness,'pii'].loc[~exp_df_initial.at[illness,'pii'].eq('')].at[illness])
-        pii_calculated_initial_df_data=pd.DataFrame(data={"pii":pii_initial,"pZi":'',"pZZ":''}, index=[illness])
-        initial_calculated_probabilities=pd.concat([pii_calculated_initial_df_data,initial_calculated_probabilities])
+    The values of possibilities will be further used in second group calculation, if this is needed, based on
+    insurance period.
 
+    """
+    #initialize flag to True, to start the while loop
+    flag_NegPos=True
+    while flag_NegPos:
+        #instantiate the object of a custom class StepwiseProbabilty
+        initialStepwiseProbabilityObject=ses.StepwiseProbabilty(eq_list_initial)
+        #defalut value for myGuess for debugging purposes, if commented out, a default random value will be used
+        #myGuess_initial=[0.00076082, 0.00051096, 0.00394945]
+        myGuess_initial=np.array([random.uniform(0.001, 0.01),random.uniform(0.001, 0.01),random.uniform(0.001, 0.01)])
+        #solve the nonlinear equation set and update the object with the solution
+        initialStepwiseProbabilityObject.fsolve_stepwise(myGuess_initial)
+        #Use sigmas to (back)calculate the pZZ value
+        initial_calculated_probabilities=cp.calculate_probabilities(initialStepwiseProbabilityObject,exp_df_initial,CRITICAL_ILLNESSES)
+        print ("initial_calculated_probabilities.values: ", initial_calculated_probabilities.values)
+        flag_NegPos=False #set the flag to Flase, if no negative values found in the iteration, theflag will remain Flase and the while loop will exit 
+        for row in initial_calculated_probabilities.values:
+            for elem in row:
+                if (not isinstance(elem,str)):
+                    fl_elem=float(elem)
+                    if fl_elem<0:
+                        flag_NegPos=True
+
+
+    print ("Final posibilities: ",initial_calculated_probabilities )
+    
     """
     Calculating nonlinear set of equations for a second age group only makes sense 
     if the value of a input parametre transitional_probabilities_expressions_second_age_group_all isn't empty
@@ -190,6 +193,9 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
         """
         sum_pZi_up_to_second_age_group_list=[]
         pZi_up_to_second_age_group_series=pd.Series(dtype=str)
+        #pZZ_calculated_initial is needed to get the pZZ_up_to_second_age_group
+        pZZ_initial=sm.sympify(initial_calculated_probabilities.at['pZZ','pZZ'])
+        pZZ_calculated_initial=pZZ_initial.subs(sigma_R,initialStepwiseProbabilityObject.sol[0]).subs(sigma_SU,initialStepwiseProbabilityObject.sol[1]).subs(sigma_MU,initialStepwiseProbabilityObject.sol[2])
         pZZ_up_to_second_age_group=pZZ_calculated_initial*sm.sympify(exp_df_second_age_group.at['pZZ','pZZ'])
         second_age_group_calculated_probabilities=pd.DataFrame(columns=['pii','pZi','pZZ'])
             
@@ -213,33 +219,34 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
             new_exp_i=new_exp_i.subs(f_i,average_prevalance_rates_all.at[illness,'65-105'])
             eq_list_second_age_group.append(new_exp_i)
         
-        #defalut value for myGuess for debugging purposes, if commented out, a default random value will be used
-        myGuess_second_age_group=[0.0042238,0.00865309,0.00845263]
+
         
-        #instantiate the object of a custom class StepwiseProbabilty
-        secondStepwiseProbabilityObject=ses.StepwiseProbabilty(eq_list_second_age_group)
-        #solve the nonlinear equation set and update the object with the solution
-        secondStepwiseProbabilityObject.fsolve_stepwise(myGuess_second_age_group)
-        
-        #calculate second age group probabilties based on the second age groupsigmas (aka stepwise transitional intensities) 
-        #these are determined in secondStepwiseProbabilityObject
-        pZZ_second_age_group=sm.sympify(exp_df_second_age_group.at['pZZ','pZZ'])
-        pZZ_calculated_second_age_group=pZZ_second_age_group.subs(sigma_R,secondStepwiseProbabilityObject.sol[0]).subs(sigma_SU,secondStepwiseProbabilityObject.sol[1]).subs(sigma_MU,secondStepwiseProbabilityObject.sol[2])
-        pZZ_calculated__second_age_group_df_data=pd.DataFrame(data={"pii":'',"pZi":'',"pZZ":pZZ_calculated_second_age_group}, index=['pZZ'])
-        second_age_group_calculated_probabilities=pd.concat([pZZ_calculated__second_age_group_df_data,second_age_group_calculated_probabilities])
-        
-        #iterate ove disease to calculate the probablities in the second age group
-        for illness in CRITICAL_ILLNESSES:
-            #select the probability value from exp_df_second_age_group that mathches the illness at location other than (~) empty (eq(''))
-            pZi_second_age_group=sm.sympify(exp_df_second_age_group.at[illness,'pZi'].loc[~exp_df_second_age_group.at[illness,'pZi'].eq('')].at[illness])
-            pZi_calculated_second_age_group=pZi_second_age_group.subs(sigma_R,secondStepwiseProbabilityObject.sol[0]).subs(sigma_SU,secondStepwiseProbabilityObject.sol[1]).subs(sigma_MU,secondStepwiseProbabilityObject.sol[2])
-            pZi_calculated_second_age_group_df_data=pd.DataFrame(data={"pii":'',"pZi":pZi_calculated_second_age_group,"pZZ":''}, index=[illness])
-            second_age_group_calculated_probabilities=pd.concat([pZi_calculated_second_age_group_df_data,second_age_group_calculated_probabilities])
-            
-            pii_second_age_group=sm.sympify(exp_df_second_age_group.at[illness,'pii'].loc[~exp_df_second_age_group.at[illness,'pii'].eq('')].at[illness])
-            pii_calculated_second_age_group_df_data=pd.DataFrame(data={"pii":pii_second_age_group,"pZi":'',"pZZ":''}, index=[illness])
-            second_age_group_calculated_probabilities=pd.concat([pii_calculated_second_age_group_df_data,second_age_group_calculated_probabilities])
-    
+
+        #initialize flag to True, to start the while loop
+        flag_NegPos=True
+        while flag_NegPos:
+            #instantiate the object of a custom class StepwiseProbabilty
+            secondStepwiseProbabilityObject=ses.StepwiseProbabilty(eq_list_second_age_group)
+            #defalut value for myGuess for debugging purposes, if commented out, a default random value will be used
+            #myGuess_second_age_group=[0.0042238,0.00865309,0.00845263]
+            myGuess_second_age_group=np.array([random.uniform(0.001, 0.01),random.uniform(0.001, 0.01),random.uniform(0.001, 0.01)])
+            #solve the nonlinear equation set and update the object with the solution
+            secondStepwiseProbabilityObject.fsolve_stepwise(myGuess_second_age_group)
+            #calculate second age group probabilties based on the second age group sigmas (aka stepwise transitional intensities) 
+            #these are determined in secondStepwiseProbabilityObject
+            second_age_group_calculated_probabilities=cp.calculate_probabilities(secondStepwiseProbabilityObject,exp_df_second_age_group,CRITICAL_ILLNESSES)
+            print ("second_age_group_calculated_probabilities.values: ", second_age_group_calculated_probabilities.values)
+            flag_NegPos=False #set the flag to Flase, if no negative values found in the iteration, theflag will remain Flase and the while loop will exit 
+            for row in second_age_group_calculated_probabilities.values:
+                for elem in row:
+                    if (not isinstance(elem,str)):
+                        fl_elem=float(elem)
+                        if fl_elem<0:
+                            flag_NegPos=True
+
+       
+        print ("Final second posibilities: ",second_age_group_calculated_probabilities )
+
         print("Both object instantiated")
         return initialStepwiseProbabilityObject,secondStepwiseProbabilityObject, initial_calculated_probabilities, second_age_group_calculated_probabilities
     else:#second age group was never taken into consideration so a secondStepwiseProbabilityObject doesn+t exist

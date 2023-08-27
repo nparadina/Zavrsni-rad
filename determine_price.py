@@ -33,16 +33,18 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
     #see paper for the pricing formula
 
     #const is the same with CI stand alone product and a CI + life (risico) product
-    const=sm.exp(beta_1_Z)*sm.exp(beta_2_Z)*(x+(hj-hi)/2)
-    
+    #const=sm.exp(beta_1_Z)*sm.exp(beta_2_Z)*(x+(hj-hi)/2)
+    const=sm.exp(beta_1_Z)*sm.exp(beta_2_Z)*(x+(hj+hi)/2)
     #CI standalone product
     CI_only_subintegral_part1= ((sm.exp(-hi*(sigma_R+sigma_SU+sigma_MU+const+delta))-sm.exp(-hj*(sigma_R+sigma_SU+sigma_MU+const+delta)))*(sr*sigma_R+ssu*sigma_SU+smu*sigma_MU))/(sigma_R+sigma_SU+sigma_MU+const+delta)
-    CI_only_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj-hi)/2))
+    #CI_only_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj-hi)/2))
+    CI_only_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj+hi)/2))
     CI_only_subintegral=CI_only_subintegral_part1*CI_only_subintegral_part2
     
     #CI + life product
     CI_life_subintegral_part1= s*((sm.exp(-hi*(sigma_R+sigma_SU+sigma_MU+const+delta-beta_2_Z))-sm.exp(-hj*(sigma_R+sigma_SU+sigma_MU+const+delta-beta_2_Z)))*(sm.exp(beta_1_Z+beta_2_Z*x)))/(sigma_R+sigma_SU+sigma_MU+const+delta-beta_2_Z)
-    CI_life_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj-hi)/2))
+    #CI_life_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj-hi)/2))
+    CI_life_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj+hi)/2))
     CI_life_subintegral=CI_life_subintegral_part1*CI_life_subintegral_part2
 
     #defining age variable for increment
@@ -97,11 +99,10 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
             hj=hj+1
             current_age=current_age+1
             iteration=iteration+1
-            print("I have been in a second age group")
     
     #the price of the insurance for CI and life combined is the sum of the both components
-    print(price_CI)
-    print(price_CI_life)
-    print(price_CI+price_CI_life)
+    # print(price_CI)
+    # print(price_CI_life)
+    # print(price_CI+price_CI_life)
 
     return price_CI, price_CI_life, price_CI+price_CI_life
