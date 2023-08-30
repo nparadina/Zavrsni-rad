@@ -20,12 +20,24 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
     #the probabilty of becomming ill from sickness i starting from age x till x+t when healty
     pZi=sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)*(1-sm.exp(beta_2_Z*t)))*sm.exp(-sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t))+sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t/2))*(1-beta_2_i*t/2))*sigma_i/(-(sigma_R+sigma_SU+sigma_MU)+sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2)))*sm.exp((sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2))-(sigma_R+sigma_SU+sigma_MU))*t-1)
     
+    #helper for debugging, to be deleted
+    #pZi_part1=sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)*(1-sm.exp(beta_2_Z*t)))
+    #pZi_part2=sm.exp(-sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t))+sm.exp(beta_1_i)/beta_2_i*sm.exp(beta_2_i*(x+t/2))*(1-beta_2_i*t/2))
+    #pZi_part3=sigma_i/(-(sigma_R+sigma_SU+sigma_MU)+sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2)))
+    #pZi_part4=sm.exp((sm.exp(beta_1_i)*sm.exp(beta_2_i*(x+t/2))-(sigma_R+sigma_SU+sigma_MU))*t-1)
+    #pZZ_part1=-sm.exp(beta_1_Z)/beta_2_Z*(sm.exp(beta_2_Z*(x+t))-sm.exp(beta_2_Z*x))
+    #pZZ_part2=(sigma_R+sigma_SU+sigma_MU)*t
+
+
     #temporery helper to pretty print the expressions for debuggin 
-    #sm.init_printing()
+    sm.init_printing()
     #print(pii)
-    #print(sm.pretty(pZZ))
+    print(sm.pretty(pZZ))
     #print(pZi)
-    #sm.pprint(pZi)
+    #sm.pprint(pZi_part1)
+    #sm.pprint(pZi_part2)
+    #sm.pprint(pZi_part3)
+    #sm.pprint(pZi_part4)
 
     #temporery Series variable to help in build the dataframe
     transitional_probability_expressions_pii=pd.Series(dtype=str)
@@ -50,10 +62,23 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
             elif row[0]=='R':
                 pZi_sigrep=pZi.subs(sigma_i,sigma_R)
             transitional_probability_expressions_row_pZi=pd.Series(data=pZi_sigrep.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta2"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            
+            #for debugging, to be deleted
+            #transitional_probability_expressions_row_pZi_part1=pd.Series(data=pZi_part1.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta2"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            #transitional_probability_expressions_row_pZi_part2=pd.Series(data=pZi_part2.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta2"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            #transitional_probability_expressions_row_pZi_part3=pd.Series(data=pZi_part3.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta2"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            #transitional_probability_expressions_row_pZi_part4=pd.Series(data=pZi_part4.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(beta_1_i,mortality_params_df_values["beta1"][row[0]]).subs(beta_2_i,mortality_params_df_values["beta2"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+
+
             transitional_probability_expressions_pZi=pd.concat([transitional_probability_expressions_pZi,transitional_probability_expressions_row_pZi], axis=0)
             expressiontypes.append("pZi")
         else:#probability of stying healthy
             transitional_probability_expressions_pZZ=pd.Series(data=pZZ.subs(beta_2_Z,mortality_params_df_values["beta2"][row[0]]).subs(beta_1_Z,mortality_params_df_values["beta1"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            
+            #for debugging, to be deleted
+            #transitional_probability_expressions_pZZ_part1=pd.Series(data=pZZ_part1.subs(beta_2_Z,mortality_params_df_values["beta2"][row[0]]).subs(beta_1_Z,mortality_params_df_values["beta1"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            #transitional_probability_expressions_pZZ_part2=pd.Series(data=pZZ_part2.subs(beta_2_Z,mortality_params_df_values["beta2"][row[0]]).subs(beta_1_Z,mortality_params_df_values["beta1"][row[0]]).subs(x,age).subs(t,time), index=[row[0]])
+            
             expressiontypes.append("pZZ")
 
     #creting a series to hold all transitional probabilities expression 
