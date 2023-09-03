@@ -30,9 +30,9 @@ def define_transitional_probabilities_functions (mortality_params_df_values, age
 
 
     #temporery helper to pretty print the expressions for debuggin 
-    sm.init_printing()
+    #sm.init_printing()
     #print(pii)
-    print(sm.pretty(pZZ))
+    #print(sm.pretty(pZZ))
     #print(pZi)
     #sm.pprint(pZi_part1)
     #sm.pprint(pZi_part2)

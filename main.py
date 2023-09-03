@@ -134,6 +134,13 @@ if type(second_stepwise_intensity)!="Optional.empty()":
 else:
     print ("Second age group empty: ",type(second_stepwise_intensity)=="Optional.empty()")
 
+for row in initial_calculated_probabilities.itertuples():
+    print(row)
+    print(row[0])
+    print(row[1])
+    print(row[2])
+    print(row[3])
+
 
 ct2=dt.datetime.now()
 print(ct2-ct1)

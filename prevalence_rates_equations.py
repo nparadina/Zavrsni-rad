@@ -96,7 +96,13 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
         pii_initial=sm.sympify(exp_df_initial.at[illness,'pii'].loc[~exp_df_initial.at[illness,'pii'].eq('')].at[illness])
         #f_i is a symbolic variable for prevalence ratem will be substituted with input values in average_prevalance_rates_all
         new_exp_i=f_i-pZi_initial/(pZZ_initial+sum_pZi_initials)
+        
+        #only for control purposes
+        #sm.init_printing()
+        #sm.pprint(new_exp_i)
         new_exp_i=new_exp_i.subs(f_i,average_prevalance_rates_all.at[illness,'20-64'])
+        #sm.pprint(new_exp_i)
+        
         #fill in eq_list_initial with new_exp_i, building the nonlinear equation set
         eq_list_initial.append(new_exp_i)
         
@@ -119,18 +125,18 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
         initialStepwiseProbabilityObject=ses.StepwiseProbabilty(eq_list_initial)
         #defalut value for myGuess for debugging purposes, if commented out, a default random value will be used
         #myGuess_initial=[0.00076082, 0.00051096, 0.00394945]
-        myGuess_initial=np.array([random.uniform(0.001, 0.01),random.uniform(0.001, 0.01),random.uniform(0.001, 0.01)])
+        myGuess_initial=np.array([random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001)])
         #solve the nonlinear equation set and update the object with the solution
         initialStepwiseProbabilityObject.fsolve_stepwise(myGuess_initial)
         #Use sigmas to (back)calculate the pZZ value
         initial_calculated_probabilities=cp.calculate_probabilities(initialStepwiseProbabilityObject,exp_df_initial,CRITICAL_ILLNESSES)
         print ("initial_calculated_probabilities.values: ", initial_calculated_probabilities.values)
-        flag_NegPos=False #set the flag to Flase, if no negative values found in the iteration, theflag will remain Flase and the while loop will exit 
+        flag_NegPos=False #set the flag to Flase, if no negative values found in the iteration, the flag will remain Flase and the while loop will exit 
         for row in initial_calculated_probabilities.values:
             for elem in row:
                 if (not isinstance(elem,str)):
                     fl_elem=float(elem)
-                    if fl_elem<0:
+                    if fl_elem<=0 and fl_elem>1:
                         flag_NegPos=True
 
 
@@ -229,7 +235,8 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
             secondStepwiseProbabilityObject=ses.StepwiseProbabilty(eq_list_second_age_group)
             #defalut value for myGuess for debugging purposes, if commented out, a default random value will be used
             #myGuess_second_age_group=[0.0042238,0.00865309,0.00845263]
-            myGuess_second_age_group=np.array([random.uniform(0.001, 0.01),random.uniform(0.001, 0.01),random.uniform(0.001, 0.01)])
+            myGuess_second_age_group=np.array([random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001)])
+            #myGuess_second_age_group=initialStepwiseProbabilityObject.sol
             #solve the nonlinear equation set and update the object with the solution
             secondStepwiseProbabilityObject.fsolve_stepwise(myGuess_second_age_group)
             #calculate second age group probabilties based on the second age group sigmas (aka stepwise transitional intensities) 
@@ -238,10 +245,13 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
             print ("second_age_group_calculated_probabilities.values: ", second_age_group_calculated_probabilities.values)
             flag_NegPos=False #set the flag to Flase, if no negative values found in the iteration, theflag will remain Flase and the while loop will exit 
             for row in second_age_group_calculated_probabilities.values:
+                #print("Second row: ", row)
                 for elem in row:
+                    #print("Elem in row: ", elem, type(elem))
                     if (not isinstance(elem,str)):
                         fl_elem=float(elem)
-                        if fl_elem<0:
+                        #print("Elem in row not str: ", fl_elem, type(fl_elem))
+                        if fl_elem<0 or fl_elem>1:
                             flag_NegPos=True
 
        
