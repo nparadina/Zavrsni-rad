@@ -10,6 +10,7 @@ import datetime as dt
 import pyodbc
 import pandas as pd
 from sqlalchemy import create_engine, MetaData, Table, select,URL
+from sqlalchemy.types import Double
 
 ct1 = dt.datetime.now()
 
@@ -107,10 +108,10 @@ print('************Solving nonlinear equations***********')
 
 #setting up database connection and counter
 #run parameters
-number_of_runs=2
+number_of_runs=30
 counter=1
 
-print('This will ne rerun', number_of_runs, 'number of time and stored in the database')     
+print('This will be rerun', number_of_runs, 'number of time and stored in the database')     
 
 #connect to DB
 server = 'LAPTOP-SLDJ2N3Q\SQLEXPRESS'
@@ -143,6 +144,8 @@ while counter<=number_of_runs:
     -As a seed the fsolve, a random number will be generated within the limits provided from previos similar papers
     -Both initial_stepwise_intensity and second_stepwise_intensity are objects of a custom defined class StepwiseProbabilty
     """ 
+    ct1 = dt.datetime.now()
+
     initial_stepwise_intensity, second_stepwise_intensity, initial_calculated_probabilities, second_age_group_calculated_probabilities=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
 
     """ 
@@ -158,48 +161,76 @@ while counter<=number_of_runs:
     print("Product price just life component: ", product_price_life)
     print("Product standalon CI and life component:", product_price_CI_life)
 
+    #inserting prices in the DB
+    sql_insert_prices='insert into product_prices values (?,?,?,?)'
+    runcon.execute(sql_insert_prices,[float(product_price_CI), float(product_price_life),float(product_price_CI_life), counter])
+    runcon.commit()
+
     print("initial_calculated_probabilities: ", initial_calculated_probabilities)
     print("initial sigmas:",initial_stepwise_intensity.sol)
+    print(type(initial_stepwise_intensity.sol))
+    
+    #list sequence needed for sql execute
+    initial_stepwise_intensity_list=initial_stepwise_intensity.sol.tolist()
+    
 
     if type(second_stepwise_intensity)!="Optional.empty()":
         print("second_age_group_calculated_probabilities: ", second_age_group_calculated_probabilities)
         print("second age group sigmas: ", second_stepwise_intensity.sol)
+        #list sequence needed for sql execute
+        second_age_group_calculated_probabilities_list=second_stepwise_intensity.sol.tolist()
     else:
         print ("Second age group empty: ",type(second_stepwise_intensity)=="Optional.empty()")
 
     for row in initial_calculated_probabilities.itertuples():
         print(row)
-        print(row[0])
-        print(row[1])
-        print(row[2])
-        print(row[3])
+        print(row[0], type(row[0]))
+        print(row[1], type(row[1]))
+        print(row[2], type(row[2]))
+        print(row[3], type(row[3]))
 
 
     ct2=dt.datetime.now()
-    print("Time it took to fine the price:", ct2-ct1)
+    #timedelta converted to string for DB insert, no timedelta object is support by DB
+    total_duration=str((ct2-ct1))
+    sql_insert_duration='insert into duration (duration, run) values (?,?)'
+    runcon.execute(sql_insert_duration,[total_duration, counter])
+    runcon.commit()
+    print("Time it took to find the price:", ct2-ct1)
     
-    # Convert the DataFrame to a format that can be written to SQL Server. Table names are constants from DB
-    
-    initial_calculated_probabilities.to_sql('initial_calculated_probabilities', engine, if_exists='append', index=True, index_label='index')
-    sql_update_initial = 'update ' + initial_calculated_probabilities+' set run= (?) WHERE run IS NULL'
+    # Convert the DataFrame to a format that can be written to SQL Server. Table names and column names are constants from DB
+    #If float in Python, an MS SQL column must also be declared as float
+    initial_calculated_probabilities.to_sql('initial_calculated_probabilities', engine, if_exists='append', index=True, index_label='index',dtype={'pii': Double, 'pZi': Double, 'pZZ': Double} )
+    sql_update_initial = 'update ' + 'initial_calculated_probabilities' +' set run= (?) WHERE run IS NULL'
     runcon.execute(sql_update_initial,counter)
     runcon.commit()
 
-    second_age_group_calculated_probabilities.to_sql('second_age_group_calculated_probabilities', engine, if_exists='append', index=True, index_label='index')
-    sql_update_second = 'update ' + second_age_group_calculated_probabilities+' set run= (?) WHERE run IS NULL'
-    runcon.execute(sql_update_second,counter)
+    sql_sigmas_initial='insert into initial_sigmas (sigma_SU, sigma_MU, sigma_R) values (?,?,?)'
+    runcon.execute(sql_sigmas_initial,initial_stepwise_intensity_list)
     runcon.commit()
 
-    sql_sigmas_initial='insert into '+'initial_sigmas'+ ' values (%s,%s,%s)'
-    runcon.execute(sql_sigmas_initial,initial_stepwise_intensity)
+    sql_update_initial_sigmas = 'update ' + 'initial_sigmas' +' set run= (?) WHERE run IS NULL'
+    runcon.execute(sql_update_initial_sigmas,counter)
     runcon.commit()
 
-    sql_sigmas_second='insert into '+'second_age_group_sigmas'+ ' values (%s,%s,%s)'
-    runcon.execute(sql_sigmas_second,second_stepwise_intensity)
-    runcon.commit()
+    if type(second_stepwise_intensity)!="Optional.empty()":
+        second_age_group_calculated_probabilities.to_sql('second_age_group_calculated_probabilities', engine, if_exists='append', index=True, index_label='index')
+        sql_update_second = 'update ' + 'second_age_group_calculated_probabilities'+' set run= (?) WHERE run IS NULL'
+        runcon.execute(sql_update_second,counter)
+        runcon.commit()
 
+        sql_sigmas_second='insert into second_age_group_sigmas (sigma_SU, sigma_MU, sigma_R) values (?,?,?)'
+        runcon.execute(sql_sigmas_second,second_age_group_calculated_probabilities_list)
+        runcon.commit()
+
+        sql_update_second_age_group_sigmas = 'update ' + 'second_age_group_sigmas' +' set run= (?) WHERE run IS NULL'
+        runcon.execute(sql_update_second_age_group_sigmas,counter)
+        runcon.commit()
+
+    #increase run counter
     counter+=1
-    
+
+#close DB connection
 runcon.close()
 pass
 
