@@ -17,11 +17,13 @@ a product that combines critical illnesses insurance and life insurance.
 
 The mathematical beackgroup to the pricing formula is presented in the paper
 """ 
-def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,force_of_interest,mortality_params_df_values,comp_su,comp_mu,comp_r,comp):
+def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,force_of_interest,mortality_params_df_values,comp_ci,comp):
     print("Entering price determination")
+    print("Input parameters:")
+    print("Age:", age_of_entry,"Duration:", policy_duration,initial_stepwise_intensity,second_stepwise_intensity,"age_group_limits:", age_group_limits,"force_of_interest:", force_of_interest,"mortality_params_df_values:", mortality_params_df_values,"compensations:", comp_ci,comp)
     
     #defining symbols
-    x, delta,ssu,smu,sr,s=sm.symbols("x,delta,su,smu,sr,s")
+    x, delta,sci,s=sm.symbols("x,delta,sci,s")
     beta_1_Z,beta_2_Z,sigma_R,sigma_SU,sigma_MU=sm.symbols("beta_1_Z,beta_2_Z,sigma_R,sigma_SU,sigma_MU")
     #limits to the CI_only_subintegral, determined by the age groups limits,in our case only 65 and 105. Initialize as 0 and 1, accordingly.
     hi=0
@@ -36,10 +38,10 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
     #const=sm.exp(beta_1_Z)*sm.exp(beta_2_Z)*(x+(hj-hi)/2)
     const=sm.exp(beta_1_Z)*sm.exp(beta_2_Z)*(x+(hj+hi)/2)
     #CI standalone product
-    CI_only_subintegral_part1= ((sm.exp(-hi*(sigma_R+sigma_SU+sigma_MU+const+delta))-sm.exp(-hj*(sigma_R+sigma_SU+sigma_MU+const+delta)))*(sr*sigma_R+ssu*sigma_SU+smu*sigma_MU))/(sigma_R+sigma_SU+sigma_MU+const+delta)
+    CI_only_subintegral_part1= ((sm.exp(-hi*(sigma_R+sigma_SU+sigma_MU+const+delta))-sm.exp(-hj*(sigma_R+sigma_SU+sigma_MU+const+delta)))*(sigma_R+sigma_SU+sigma_MU))/(sigma_R+sigma_SU+sigma_MU+const+delta)
     #CI_only_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj-hi)/2))
     CI_only_subintegral_part2= sm.exp(sm.exp(beta_1_Z)/beta_2_Z*sm.exp(beta_2_Z*x)-const/beta_2_Z*(1-beta_2_Z*(hj+hi)/2))
-    CI_only_subintegral=CI_only_subintegral_part1*CI_only_subintegral_part2
+    CI_only_subintegral=sci*CI_only_subintegral_part1*CI_only_subintegral_part2
     
     #CI + life product
     CI_life_subintegral_part1= s*((sm.exp(-hi*(sigma_R+sigma_SU+sigma_MU+const+delta-beta_2_Z))-sm.exp(-hj*(sigma_R+sigma_SU+sigma_MU+const+delta-beta_2_Z)))*(sm.exp(beta_1_Z+beta_2_Z*x)))/(sigma_R+sigma_SU+sigma_MU+const+delta-beta_2_Z)
@@ -54,8 +56,8 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
     iteration=0
 
     #prints for debugging
-    # print("Beta2:", mortality_params_df_values["beta2"]["ZM"])
-    # print("Beta1:",mortality_params_df_values["beta1"]["ZM"])
+    print("Beta2:", mortality_params_df_values["beta2"]["ZM"])
+    print("Beta1:",mortality_params_df_values["beta1"]["ZM"])
     # print("Sigma1R:", initial_stepwise_intensity.sol[0])
     # print("Sigma1SU:",initial_stepwise_intensity.sol[1])
     # print("Sigma1MU:",initial_stepwise_intensity.sol[2])
@@ -69,18 +71,26 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
     # print("Sumsigmas2:", sum_sigmas_second)
 
 
+
     # determining the price for all products
     while iteration < (policy_duration):
         if current_age<age_group_limits[0]:
-            #stnad alone CI
-            price_CI=price_CI+CI_only_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(sr,comp_r).subs(ssu,comp_su).subs(smu,comp_mu)
+            #const
+            print("Const: ", const.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(x,current_age))
+            #stand alone CI
+            print("Price Ci prior the iteration: ",iteration, " is ",price_CI )
+            price_CI=price_CI+CI_only_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(sci,comp_ci)
+            print("Price Ci after the iteration: ",iteration, " is ",price_CI )
             #life component of a product combining CI and life
+            print("Price Ci_life prior the iteration: ",iteration, " is ",price_CI_life)
             price_CI_life=price_CI_life+CI_life_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(s,comp)
+            print("Price Ci_life after the iteration: ",iteration, " is ",price_CI_life)
             #prints for debugging
             # print("const: ", const.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(x,current_age))
-            # print("CI_only_subintegral_part1: ",CI_only_subintegral_part1.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest))
+            print("CI_only_subintegral_part1: ",CI_only_subintegral_part1.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest))
             # print( CI_only_subintegral_part2)
-            # print("CI_only_subintegral_part2: ",CI_only_subintegral_part2.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest))
+            print("CI_only_subintegral_part2: ",CI_only_subintegral_part2.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest))
+            print("CI_whole: ", CI_only_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(sci,comp_ci))
             hi=hi+1
             hj=hj+1
             current_age=current_age+1
@@ -93,8 +103,12 @@ def determine_price(age_of_entry,policy_duration,initial_stepwise_intensity,seco
         When no second age group probabilties were calcualted the second_stepwise_intensity object is empty
         """
         if  current_age<age_group_limits[1] and current_age>=age_group_limits[0] and type(second_stepwise_intensity)!="Optional.empty()":
-            price_CI=price_CI+CI_only_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,second_stepwise_intensity.sol[0]).subs(sigma_SU,second_stepwise_intensity.sol[1]).subs(sigma_MU,second_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(sr,comp_r).subs(ssu,comp_su).subs(smu,comp_mu)
+            print("Price Ci prior the iteration: ",iteration, " is ",price_CI )
+            price_CI=price_CI+CI_only_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,second_stepwise_intensity.sol[0]).subs(sigma_SU,second_stepwise_intensity.sol[1]).subs(sigma_MU,second_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(sci,comp_ci)
+            print("Price Ci after the iteration: ",iteration, " is ",price_CI )
+            print("Price Ci_life prior the iteration: ",iteration, " is ",price_CI_life)
             price_CI_life=price_CI_life+CI_life_subintegral.subs(beta_1_Z,mortality_params_df_values["beta1"]["ZM"]).subs(beta_2_Z,mortality_params_df_values["beta2"]["ZM"]).subs(sigma_R,initial_stepwise_intensity.sol[0]).subs(sigma_SU,initial_stepwise_intensity.sol[1]).subs(sigma_MU,initial_stepwise_intensity.sol[2]).subs(x,current_age).subs(delta,force_of_interest).subs(s,comp)
+            print("Price Ci_life after the iteration: ",iteration, " is ",price_CI_life)
             hi=hi+1
             hj=hj+1
             current_age=current_age+1

@@ -20,9 +20,8 @@ x0=38
 #policy duration
 n=40
 #insurance payments for critical illnesses, in €
-ssu=20000
-smu=20000
-sr=20000
+sci=20000
+
 #insurance payment in case of death to other causes, in €
 s=20000
 
@@ -108,7 +107,7 @@ print('************Solving nonlinear equations***********')
 
 #setting up database connection and counter
 #run parameters
-number_of_runs=30
+number_of_runs=1
 counter=1
 
 print('This will be rerun', number_of_runs, 'number of time and stored in the database')     
@@ -134,7 +133,7 @@ cnxn=engine.connect()
 connection=engine.raw_connection()
 runcon=connection.cursor()
 
-while counter<=number_of_runs:
+while counter<(number_of_runs+counter):
 
     """ 
     -Function prevalence_rates_equations takes the transitional probability expressions and average prevalance rate
@@ -155,7 +154,7 @@ while counter<=number_of_runs:
 
     The mathematical beackgroup to the pricing formula is presented in the paper
     """ 
-    product_price_CI, product_price_life, product_price_CI_life =dp.determine_price(x0,n,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df,ssu,smu,sr,s)
+    product_price_CI, product_price_life, product_price_CI_life =dp.determine_price(x0,n,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df,sci,s)
 
     print("Product standalon CI:", product_price_CI)
     print("Product price just life component: ", product_price_life)
