@@ -5,7 +5,7 @@ from model_fitting_gompertz import *
 import numpy as np
 import transitional_probabilities_functions as tpf
 import prevalence_rates_equations as pre
-import determine_price as dp
+import determine_price_obsolete as dp
 import determine_price_subintervals as dps
 import datetime as dt
 
@@ -13,11 +13,11 @@ ct1 = dt.datetime.now()
 
 #Setting product variables, in next iteration could be repurpused to be used as web interface
 # insurable age start
-x0=38
+x0=30
 #policy duration
-n=40
+n=10
 #insurance payments for critical illnesses, in €
-sci=1000
+sci=1000 
 
 #insurance payment in case of death to other causes, in €
 s=1000
@@ -128,11 +128,11 @@ print("Product standalon CI and life component:", product_price_CI_life)
 print("initial_calculated_probabilities: ", initial_calculated_probabilities)
 print("initial sigmas:",initial_stepwise_intensity.sol)
 
-if type(second_stepwise_intensity)!="Optional.empty()":
+if second_stepwise_intensity.is_present():
     print("second_age_group_calculated_probabilities: ", second_age_group_calculated_probabilities)
     print("second age group sigmas: ", second_stepwise_intensity.sol)
 else:
-    print ("Second age group empty: ",type(second_stepwise_intensity)=="Optional.empty()")
+    print ("Second age group empty: ",not second_stepwise_intensity.is_present())
 
 for row in initial_calculated_probabilities.itertuples():
     print(row)

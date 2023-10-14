@@ -5,7 +5,7 @@ from model_fitting_gompertz import *
 import numpy as np
 import transitional_probabilities_functions as tpf
 import prevalence_rates_equations as pre
-import determine_price as dp
+import determine_price_obsolete as dp
 import datetime as dt
 import pyodbc
 import pandas as pd
