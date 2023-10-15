@@ -13,9 +13,9 @@ ct1 = dt.datetime.now()
 
 #Setting product variables, in next iteration could be repurpused to be used as web interface
 # insurable age start
-x0=30
+x0=55
 #policy duration
-n=10
+n=25
 #insurance payments for critical illnesses, in €
 sci=1000 
 

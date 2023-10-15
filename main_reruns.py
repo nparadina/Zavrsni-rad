@@ -6,6 +6,7 @@ import numpy as np
 import transitional_probabilities_functions as tpf
 import prevalence_rates_equations as pre
 import determine_price_obsolete as dp
+import determine_price_subintervals as dps
 import datetime as dt
 import pyodbc
 import pandas as pd
@@ -154,7 +155,7 @@ while counter<(number_of_runs+counter):
 
     The mathematical beackgroup to the pricing formula is presented in the paper
     """ 
-    product_price_CI, product_price_life, product_price_CI_life =dp.determine_price(x0,n,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df,sci,s)
+    product_price_CI, product_price_life, product_price_CI_life =dps.determine_price_subintervals(x0,n,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df,sci,s)
 
     print("Product standalon CI:", product_price_CI)
     print("Product price just life component: ", product_price_life)
@@ -173,13 +174,13 @@ while counter<(number_of_runs+counter):
     initial_stepwise_intensity_list=initial_stepwise_intensity.sol.tolist()
     
 
-    if type(second_stepwise_intensity)!="Optional.empty()":
+    if second_stepwise_intensity.is_present():
         print("second_age_group_calculated_probabilities: ", second_age_group_calculated_probabilities)
         print("second age group sigmas: ", second_stepwise_intensity.sol)
         #list sequence needed for sql execute
         second_age_group_calculated_probabilities_list=second_stepwise_intensity.sol.tolist()
     else:
-        print ("Second age group empty: ",type(second_stepwise_intensity)=="Optional.empty()")
+        print ("Second age group empty: ",not second_stepwise_intensity.is_present())
 
     for row in initial_calculated_probabilities.itertuples():
         print(row)
@@ -212,7 +213,7 @@ while counter<(number_of_runs+counter):
     runcon.execute(sql_update_initial_sigmas,counter)
     runcon.commit()
 
-    if type(second_stepwise_intensity)!="Optional.empty()":
+    if second_stepwise_intensity.is_present():
         second_age_group_calculated_probabilities.to_sql('second_age_group_calculated_probabilities', engine, if_exists='append', index=True, index_label='index')
         sql_update_second = 'update ' + 'second_age_group_calculated_probabilities'+' set run= (?) WHERE run IS NULL'
         runcon.execute(sql_update_second,counter)
