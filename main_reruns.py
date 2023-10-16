@@ -17,14 +17,14 @@ ct1 = dt.datetime.now()
 
 #Setting product variables, in next iteration could be repurpused to be used as web interface
 # insurable age start
-x0=38
+x0=40
 #policy duration
-n=40
+n=30
 #insurance payments for critical illnesses, in €
-sci=20000
+sci=25000
 
 #insurance payment in case of death to other causes, in €
-s=20000
+s=25000
 
 #Setting data for modelling, Excel Sheets
 #TBD Get the data from DB, set these path as commentary
@@ -108,7 +108,7 @@ print('************Solving nonlinear equations***********')
 
 #setting up database connection and counter
 #run parameters
-number_of_runs=1
+number_of_runs=100
 counter=1
 
 print('This will be rerun', number_of_runs, 'number of time and stored in the database')     
@@ -134,7 +134,7 @@ cnxn=engine.connect()
 connection=engine.raw_connection()
 runcon=connection.cursor()
 
-while counter<(number_of_runs+counter):
+while counter<(number_of_runs):
 
     """ 
     -Function prevalence_rates_equations takes the transitional probability expressions and average prevalance rate
