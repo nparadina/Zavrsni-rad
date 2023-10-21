@@ -13,14 +13,14 @@ ct1 = dt.datetime.now()
 
 #Setting product variables, in next iteration could be repurpused to be used as web interface
 # insurable age start
-x0=55
+x0=38
 #policy duration
-n=25
+n=10
 #insurance payments for critical illnesses, in €
-sci=1000 
+sci=25000 
 
 #insurance payment in case of death to other causes, in €
-s=1000
+s=25000
 
 #Setting data for modelling, Excel Sheets
 #TBD Get the data from DB, set these path as commentary

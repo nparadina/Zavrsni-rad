@@ -86,7 +86,7 @@ def determine_price_subintervals(age_of_entry,policy_duration,initial_stepwise_i
         print(type(second_stepwise_intensity)!="<class 'optional.nothing.Nothing'>")
         print(type(second_stepwise_intensity)!="optional.nothing.Nothing")
         print(type(second_stepwise_intensity)!="optional.nothing.Nothing")
-        print(second_stepwise_intensity.is_present())
+        #print(second_stepwise_intensity.is_present())
         
         if current_age_iter<age_group_limits[0]:
             #const
