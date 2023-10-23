@@ -134,7 +134,7 @@ cnxn=engine.connect()
 connection=engine.raw_connection()
 runcon=connection.cursor()
 
-while counter<(number_of_runs):
+while counter<(number_of_runs+1):
 
     """ 
     -Function prevalence_rates_equations takes the transitional probability expressions and average prevalance rate
