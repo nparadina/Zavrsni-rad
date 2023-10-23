@@ -108,7 +108,7 @@ print('************Solving nonlinear equations***********')
 
 #setting up database connection and counter
 #run parameters
-number_of_runs=100
+number_of_runs=101
 counter=1
 
 print('This will be rerun', number_of_runs, 'number of time and stored in the database')     
