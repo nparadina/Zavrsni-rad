@@ -4,6 +4,7 @@ import pandas as pd
 from model_fitting_gompertz import *
 import numpy as np
 import transitional_probabilities_functions as tpf
+import transitional_probabilities_functions_gamma as tpfg
 import prevalence_rates_equations as pre
 import determine_price_obsolete as dp
 import determine_price_subintervals as dps
@@ -22,13 +23,20 @@ x0=40
 n=30
 #insurance payments for critical illnesses, in €
 sci=25000
-
 #insurance payment in case of death to other causes, in €
 s=25000
 
+#flag and value of added mortality if used
+include_added_mortality=True
+gamma=0.25
+
 #Setting data for modelling, Excel Sheets
-#TBD Get the data from DB, set these path as commentary
-path_death_probabilities='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Vjerojatnost smrti populacije od kriticnih bolesti i zdravih od ostalih bolesti.xlsx'
+
+if (not include_added_mortality):
+    path_death_probabilities='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Vjerojatnost smrti populacije od kriticnih bolesti i zdravih od ostalih bolesti_gamma_0'
+else:
+    path_death_probabilities='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Vjerojatnost smrti populacije od kriticnih bolesti i zdravih od ostalih bolesti_gamma_0,25'
+
 path_initial_Gompertz_parameteres='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Inijalni parametri GM Modela.xlsx'
 path_prevalence_rates='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Prevalencija_Srednja_vrijednost.xlsx'
 #Setting paraemeters for transitional_probabilities_expressions
@@ -83,13 +91,23 @@ print('*******Defining transitional probablities expression******')
 -expression are a tool from sympy repository can work and perform matehmatical calculations with symbolic variables
 -expressions will be used to describe the transitional probabilities of getting sick, dying, staying healthy or staying sick
 -transitional probabilities expresssion will be used onwards with the known prevlance rates 
-to determine the stepwise constant transitional intensities other than mortality rate calculated according to GM 
+to determine the stepwise constant transitional intensities other than mortality rate calculated according to GM
+--depending if additional mortality factor is included or not either tpf.define_transitional_probabilities_functions
+or tpfg.define_transitional_probabilities_functions_gamma is called, see flag include_added_mortality
 """
-transitional_probabilities_expressions_initial_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0,t1)
-if t2>0:#if the insurance continues into the second age group 
-    transitional_probabilities_expressions_second_age_group_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0+t1,t2)
-else:#if the insurance stops before the second age group, create the empty dataframe
-    transitional_probabilities_expressions_second_age_group_all=pd.DataFrame()
+
+if  not include_added_mortality:
+    transitional_probabilities_expressions_initial_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0,t1)
+    if t2>0:#if the insurance continues into the second age group 
+        transitional_probabilities_expressions_second_age_group_all=tpf.define_transitional_probabilities_functions(mortality_params_df,x0+t1,t2)
+    else:#if the insurance stops before the second age group, create the empty dataframe
+        transitional_probabilities_expressions_second_age_group_all=pd.DataFrame()
+else:
+    transitional_probabilities_expressions_initial_all=tpfg.define_transitional_probabilities_functions_gamma(mortality_params_df,x0,t1,gamma)
+    if t2>0:#if the insurance continues into the second age group 
+        transitional_probabilities_expressions_second_age_group_all=tpfg.define_transitional_probabilities_functions_gamma(mortality_params_df,x0+t1,t2,gamma)
+    else:#if the insurance stops before the second age group, create the empty dataframe
+        transitional_probabilities_expressions_second_age_group_all=pd.DataFrame()
 
 """ 
 Load calculated data about prevalence rates
@@ -108,8 +126,8 @@ print('************Solving nonlinear equations***********')
 
 #setting up database connection and counter
 #run parameters
-number_of_runs=201
-counter=100
+number_of_runs=100500
+counter=100000
 
 print('This will be rerun', number_of_runs, 'number of time and stored in the database')     
 

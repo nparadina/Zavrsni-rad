@@ -125,9 +125,11 @@ def prevalence_rates_equations (transitional_probabilities_expressions_initial_a
         initialStepwiseProbabilityObject=ses.StepwiseProbabilty(eq_list_initial)
         #defalut value for myGuess for debugging purposes, if commented out, a default random value will be used
         #myGuess_initial=[0.00076082, 0.00051096, 0.00394945]
-        myGuess_initial=np.array([random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001)])
+        #myGuess_initial=np.array([random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001)])
+        myGuess_initial=np.array([random.uniform(0.000001, 0.001),random.uniform(0.000001, 0.001),random.uniform(0.000001, 0.001)])
         #solve the nonlinear equation set and update the object with the solution
         initialStepwiseProbabilityObject.fsolve_stepwise(myGuess_initial)
+        print("I have sold something")
         #Use sigmas to (back)calculate the pZZ value
         initial_calculated_probabilities=cp.calculate_probabilities(initialStepwiseProbabilityObject,exp_df_initial,CRITICAL_ILLNESSES)
         print ("initial_calculated_probabilities.values: ", initial_calculated_probabilities.values)

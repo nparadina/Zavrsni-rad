@@ -28,7 +28,7 @@ class StepwiseProbabilty:
         return f    
     def is_present(self):
         return 1
-    def fsolve_stepwise(self, myGuess=np.array([random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001)])):
+    def fsolve_stepwise(self, myGuess=np.array([random.uniform(0.000001, 0.001),random.uniform(0.000001, 0.001),random.uniform(0.000001, 0.001)])):
         self.myGuess=myGuess
         print(myGuess)
         #print(self.equation_list)
@@ -38,7 +38,8 @@ class StepwiseProbabilty:
 
         while np.any(self.sol<=0):
             self.counter+=1
-            self.myGuess=np.array([random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001)])
+            #self.myGuess=np.array([random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001),random.uniform(0.0000001, 0.00001)])
+            self.myGuess=np.array([random.uniform(0.000001, 0.001),random.uniform(0.000001, 0.001),random.uniform(0.000001, 0.001)])
             self.sol= fsolve(self.equations, self.myGuess)
 
        
