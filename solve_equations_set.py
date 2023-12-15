@@ -30,7 +30,7 @@ class StepwiseProbabilty:
         return 1
     def fsolve_stepwise(self, myGuess=np.array([random.uniform(0.000001, 0.001),random.uniform(0.000001, 0.001),random.uniform(0.000001, 0.001)])):
         self.myGuess=myGuess
-        print(myGuess)
+        #print(myGuess)
         #print(self.equation_list)
         self.sol=np.array([0,0,0])
         self.counter=0

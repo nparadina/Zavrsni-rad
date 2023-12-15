@@ -6,7 +6,6 @@ import numpy as np
 import transitional_probabilities_functions as tpf
 import transitional_probabilities_functions_gamma as tpfg
 import prevalence_rates_equations as pre
-import determine_price_obsolete as dp
 import determine_price_subintervals as dps
 import datetime as dt
 import pyodbc
@@ -20,7 +19,7 @@ ct1 = dt.datetime.now()
 # insurable age start
 x0=38
 #policy duration
-n=10
+n=40
 #insurance payments for critical illnesses, in €
 sci=20000
 #insurance payment in case of death to other causes, in €
@@ -39,10 +38,11 @@ else:
 
 path_initial_Gompertz_parameteres='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Inijalni parametri GM Modela.xlsx'
 path_prevalence_rates='C:/Users/nikap/Documents/Edukacija/Aktuarstvo/Zavrsni rad/Code Repository/Zavrsni-rad/Prevalencija_Srednja_vrijednost.xlsx'
+
 #Setting paraemeters for transitional_probabilities_expressions
 
 #First age group from 20-64, second age group from 65-105, age list with limit ages. As per morbidity data collected on the market
-#More granular data istn+t being collected
+#More granular data istn't being collected
 age_group_limits=[65,105]
 #t1 is time during which the prevalence rates based on the first age group collected data can be applied
 if (x0+n<age_group_limits[0]):
@@ -57,6 +57,7 @@ if (x0+n<age_group_limits[1]):
         t2=x0+n-age_group_limits[0]
 else:
     t2=age_group_limits[1]-age_group_limits[0]
+
 #Setting parameters for a constant force of interest
 delta=0.05
 #setting insured critical illnesses - A CONSTANT
@@ -65,7 +66,7 @@ CRITICAL_ILLNESSES=['SU','MU','R']
 #defining parameters of a mortality model, using 
 mortality_model_parameters_labels=['beta1','beta2']
 #calculating a mortality model
-#get the number of inured illnesses
+#get the number of insured illnesses
 no_illnesses=len(CRITICAL_ILLNESSES)
 
 #the minimizer_results_list is a list with references to the MinimizerResult Objects
@@ -112,7 +113,7 @@ else:
 """ 
 Load calculated data about prevalence rates
 Date is calculated as an average rate from 2001 untill 2019 per age group
-average_prevalance_rates_all_df= pd.DataFrame(data={'65-105':[6.51,1.10,2.63],'20-64':[1.54,0.30,0.37]}, index=CRITICAL_ILLNESSES)
+dummy data for test: average_prevalance_rates_all_df= pd.DataFrame(data={'65-105':[6.51,1.10,2.63],'20-64':[1.54,0.30,0.37]}, index=CRITICAL_ILLNESSES)
 """ 
 average_prevalance_rates_all_df= pd.read_excel(path_prevalence_rates)
 average_prevalance_rates_all_df.set_index('illness', inplace=True)
@@ -122,14 +123,13 @@ ct2=dt.datetime.now()
 print("Time to set up for step-wise probabilties to begin calculation: ", ct2-ct1)
 
 
+print('************Setting database connections***********')
 print('************Solving nonlinear equations***********')
 
 #setting up database connection and counter
 #run parameters
-number_of_runs=20500
-counter=20000
-
-print('This will be rerun 500 times and stored in the database')     
+number_of_runs=1000001
+counter=1000000    
 
 #connect to DB
 server = 'LAPTOP-SLDJ2N3Q\SQLEXPRESS'
@@ -156,23 +156,24 @@ while counter<(number_of_runs+1):
 
     """ 
     -Function prevalence_rates_equations takes the transitional probability expressions and average prevalance rate
-    -Combinig the expression for transitional probability expressions which all have step-wise constat transitional probabilities sigmas
+    -Combining the expression for transitional probability expressions which all have step-wise constat transitional probabilities sigmas
     and known average prevalance rate we create a nonlinear set of equations
     -The numerical solutions to the mention nonlinear set of equations is calculated with scypy's fsolve
     -As a seed the fsolve, a random number will be generated within the limits provided from previos similar papers
-    -Both initial_stepwise_intensity and second_stepwise_intensity are objects of a custom defined class StepwiseProbabilty
+    -Both initial_stepwise_intensity and second_stepwise_intensity are objects of a custom defined class StepwiseProbability
     """ 
     ct1 = dt.datetime.now()
 
     initial_stepwise_intensity, second_stepwise_intensity, initial_calculated_probabilities, second_age_group_calculated_probabilities=pre.prevalence_rates_equations(transitional_probabilities_expressions_initial_all,transitional_probabilities_expressions_second_age_group_all,average_prevalance_rates_all_df,CRITICAL_ILLNESSES)
 
     """ 
-    Combining the information in about stepwise transitional intensities
+    Combining the information about stepwise transitional intensities
     and the parameters decided upon at the time of policy definition
     the function determine_price returns the net premium of such a product
 
     The mathematical beackgroup to the pricing formula is presented in the paper
     """ 
+    print("Entering price determination")
     product_price_CI, product_price_life, product_price_CI_life =dps.determine_price_subintervals(x0,n,initial_stepwise_intensity,second_stepwise_intensity,age_group_limits,delta,mortality_params_df,sci,s)
 
     print("Product standalon CI:", product_price_CI)
@@ -184,29 +185,23 @@ while counter<(number_of_runs+1):
     runcon.execute(sql_insert_prices,[float(product_price_CI), float(product_price_life),float(product_price_CI_life), counter])
     runcon.commit()
 
-    print("initial_calculated_probabilities: ", initial_calculated_probabilities)
+    #print("initial_calculated_probabilities: ", initial_calculated_probabilities)
     print("initial sigmas:",initial_stepwise_intensity.sol)
-    print(type(initial_stepwise_intensity.sol))
+    #helper print for debuging
+    #print(type(initial_stepwise_intensity.sol))
     
     #list sequence needed for sql execute
     initial_stepwise_intensity_list=initial_stepwise_intensity.sol.tolist()
     
 
     if second_stepwise_intensity.is_present():
-        print("second_age_group_calculated_probabilities: ", second_age_group_calculated_probabilities)
+        #helper print for debuging
+        #print("second_age_group_calculated_probabilities: ", second_age_group_calculated_probabilities)
         print("second age group sigmas: ", second_stepwise_intensity.sol)
         #list sequence needed for sql execute
         second_age_group_calculated_probabilities_list=second_stepwise_intensity.sol.tolist()
     else:
         print ("Second age group empty: ",not second_stepwise_intensity.is_present())
-
-    for row in initial_calculated_probabilities.itertuples():
-        print(row)
-        print(row[0], type(row[0]))
-        print(row[1], type(row[1]))
-        print(row[2], type(row[2]))
-        print(row[3], type(row[3]))
-
 
     ct2=dt.datetime.now()
     #timedelta converted to string for DB insert, no timedelta object is support by DB

@@ -1,6 +1,10 @@
 import sympy as sm
 import pandas as pd
 
+""" 
+The functions uses the mathematically determined sigmas to reverse calculate the probabilities
+""" 
+
 def calculate_probabilities (StepwiseProbabilityObject, exp_df,CRITICAL_ILLNESSES):
     sigma_R,sigma_SU,sigma_MU=sm.symbols("sigma_R,sigma_SU,sigma_MU")
     pZZ=sm.sympify(exp_df.at['pZZ','pZZ'])

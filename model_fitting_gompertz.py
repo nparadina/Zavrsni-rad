@@ -32,12 +32,12 @@ def model_fitting_gompertz(path_death_probabilities,path_initial_Gompertz_parame
     #initialize array for all parameters, set initial values from Excel file
     parameters_initial_df = pd.read_excel(path_initial_Gompertz_parameteres)
     #creates a numpy array(to_numpy()) containing only the parameter values, not their indexes
-    #that is why iloc[:,1:] was used-> get me all the row values, discard the indeyes in column 0
+    #that is why iloc[:,1:] was used-> get me all the row values, discard the indexes in column 0
     parameter_array=parameters_initial_df.iloc[:,1:].to_numpy()
 
     #Perform fitting for all data and all initial parameters, save outputs in results list
-    #initialize results list if Minimizer Result objects
-    #if betas belos to a specific illness or the general healty state is known implicitly, no index is set, keeping the result as a simple list
+    #initialize results list in Minimizer Result objects
+    #if betas belog to a specific illness or the general healty state is known implicitly, no index is set, keeping the result as a simple list
     minimizer_results_list=[]
 
     #a function to perform the fitting of beta_1 and beta_2 parameters of the GM model will be called per parameter_array row each containing the mortality per illness or general
