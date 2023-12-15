@@ -18,13 +18,13 @@ ct1 = dt.datetime.now()
 
 #Setting product variables, in next iteration could be repurpused to be used as web interface
 # insurable age start
-x0=40
+x0=38
 #policy duration
-n=30
+n=10
 #insurance payments for critical illnesses, in €
-sci=25000
+sci=20000
 #insurance payment in case of death to other causes, in €
-s=25000
+s=20000
 
 #flag and value of added mortality if used
 include_added_mortality=True
@@ -126,10 +126,10 @@ print('************Solving nonlinear equations***********')
 
 #setting up database connection and counter
 #run parameters
-number_of_runs=100500
-counter=100000
+number_of_runs=20500
+counter=20000
 
-print('This will be rerun', number_of_runs, 'number of time and stored in the database')     
+print('This will be rerun 500 times and stored in the database')     
 
 #connect to DB
 server = 'LAPTOP-SLDJ2N3Q\SQLEXPRESS'

@@ -6,7 +6,7 @@ import numpy as np
 import transitional_probabilities_functions as tpf
 import transitional_probabilities_functions_gamma as tpfg
 import prevalence_rates_equations as pre
-import determine_price_obsolete as dp
+#import determine_price_obsolete as dp
 import determine_price_subintervals as dps
 import datetime as dt
 
@@ -23,7 +23,7 @@ sci=25000
 s=25000
 
 #flag and value of added mortality if used
-include_added_mortality=True
+include_added_mortality=False
 gamma=0.25
 
 #Setting data for modelling, Excel Sheets
