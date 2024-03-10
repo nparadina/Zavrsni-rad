@@ -23,7 +23,7 @@ sci=25000
 s=25000
 
 #flag and value of added mortality, if used set to True
-include_added_mortality=False
+include_added_mortality=True
 gamma=0.25
 
 #Setting data for modelling, Excel Sheets
