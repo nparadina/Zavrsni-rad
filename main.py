@@ -109,7 +109,7 @@ else:
 """ 
 Load calculated data about prevalence rates
 Date is calculated as an average rate from 2001 untill 2019 per age group
-dummy data for test: average_prevalance_rates_all_df= pd.DataFrame(data={'65-105':[6.51,1.10,2.63],'20-64':[1.54,0.30,0.37]}, index=CRITICAL_ILLNESSES)
+dummy data for test: average_prevalance_rates_all_df= pd.DataFrame(data={'65-105':[0.011662,0.027642,0.069706],'20-64':[0.003195,0.003929,0.016146]}, index=CRITICAL_ILLNESSES)
 """ 
 average_prevalance_rates_all_df= pd.read_excel(path_prevalence_rates)
 average_prevalance_rates_all_df.set_index('illness', inplace=True)
@@ -144,7 +144,7 @@ product_price_CI, product_price_life, product_price_CI_life =dps.determine_price
 
 print("Product standalon CI:", product_price_CI)
 print("Product price just life component: ", product_price_life)
-print("Product standalon CI and life component:", product_price_CI_life)
+print("Product standalone CI and life component:", product_price_CI_life)
 
 #print("initial_calculated_probabilities: ", initial_calculated_probabilities)
 print("initial sigmas:",initial_stepwise_intensity.sol)
